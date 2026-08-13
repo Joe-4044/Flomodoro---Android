@@ -570,6 +570,82 @@
       opacity: 0.4;
     }
 
+    /* ── PUNCH LOG ─────────────────────────────────────────────────────── */
+    .log-pane { padding: 12px; display: flex; flex-direction: column; gap: 20px; }
+    .log-date-group { display: flex; flex-direction: column; gap: 2px; }
+    .log-date-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text4); padding: 4px 4px 8px; }
+    .log-entry { display: flex; align-items: center; gap: 12px; padding: 13px 14px; background: var(--bg3); border: 0.5px solid var(--border2); border-radius: 12px; }
+    .log-entry-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .log-entry-info { flex: 1; min-width: 0; }
+    .log-entry-name { font-size: 13px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 3px; }
+    .log-entry-meta { font-family: var(--mono); font-size: 10px; color: var(--text3); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .log-tier-pill { font-size: 8px; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 20px; border: 0.5px solid currentColor; opacity: 0.85; }
+    .log-entry-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+    .log-entry-dur { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text2); }
+    .log-clip-dots { display: flex; gap: 3px; flex-wrap: wrap; justify-content: flex-end; max-width: 60px; }
+    .log-clip-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+    .log-empty { padding: 48px 20px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text4); letter-spacing: 0.05em; }
+
+    /* ── REWARDS JAR ───────────────────────────────────────────────────── */
+    .jar-pane { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .jar-visual-row { display: flex; gap: 16px; align-items: flex-end; }
+    .jar-svg-wrap { flex-shrink: 0; }
+    .jar-stats { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .jar-total-amt { font-family: var(--mono); font-size: 36px; font-weight: 700; color: var(--green); line-height: 1; }
+    .jar-total-label { font-family: var(--mono); font-size: 9px; color: var(--text4); letter-spacing: 0.08em; margin-bottom: 8px; }
+    .prize-lines { display: flex; flex-direction: column; gap: 8px; }
+    .prize-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg3); border: 0.5px solid var(--border2); border-radius: 11px; }
+    .prize-row.reached { border-color: var(--green-border); background: var(--green-bg); }
+    .prize-key { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text4); width: 32px; flex-shrink: 0; }
+    .prize-row.reached .prize-key { color: var(--green); }
+    .prize-lbl { flex: 1; font-size: 13px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .prize-amt { font-family: var(--mono); font-size: 11px; color: var(--text3); flex-shrink: 0; }
+    .prize-row.reached .prize-amt { color: var(--green); }
+    .ledger-section { background: var(--bg3); border: 0.5px solid var(--border2); border-radius: 14px; overflow: hidden; }
+    .ledger-header { padding: 12px 16px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text4); border-bottom: 0.5px solid var(--border2); }
+    .ledger-row { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 0.5px solid var(--border2); font-family: var(--mono); font-size: 11px; color: var(--text3); }
+    .ledger-row:last-child { border-bottom: none; }
+    .ledger-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .ledger-amt { margin-left: auto; color: var(--green); font-size: 11px; }
+    .ledger-empty { padding: 20px 16px; font-family: var(--mono); font-size: 10px; color: var(--text4); text-align: center; }
+
+    /* ── WEEKLY ────────────────────────────────────────────────────────── */
+    .weekly-pane { padding: 16px; display: flex; flex-direction: column; gap: 4px; }
+    .weekly-header { font-family: var(--mono); font-size: 9px; color: var(--text4); letter-spacing: 0.08em; padding: 4px 0 14px; }
+    .weekly-row { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 0.5px solid var(--border2); }
+    .weekly-row:last-child { border-bottom: none; }
+    .weekly-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .weekly-name { flex: 1; font-size: 14px; color: var(--text2); }
+    .weekly-stats { font-family: var(--mono); font-size: 10px; color: var(--text3); text-align: right; line-height: 1.6; }
+
+    /* ── TICKETS ───────────────────────────────────────────────────────── */
+    .tickets-pane { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .tickets-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; border: 0.5px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .tickets-summary-cell { padding: 14px 8px; text-align: center; border-right: 0.5px solid var(--border); }
+    .tickets-summary-cell:last-child { border-right: none; }
+    .tickets-summary-count { font-family: var(--mono); font-size: 28px; font-weight: 700; line-height: 1; }
+    .tickets-summary-label { font-family: var(--mono); font-size: 8px; letter-spacing: 0.1em; color: var(--text4); margin-top: 5px; }
+    .tickets-filter { display: grid; grid-template-columns: 1fr 1fr 1fr; background: var(--bg3); border: 0.5px solid var(--border); border-radius: 9px; overflow: hidden; }
+    .ticket-filter-btn { padding: 9px 6px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.05em; color: var(--text3); border-right: 0.5px solid var(--border2); transition: background 0.15s, color 0.15s; -webkit-tap-highlight-color: transparent; }
+    .ticket-filter-btn:last-child { border-right: none; }
+    .ticket-filter-btn.active { background: var(--bg4); color: var(--text); font-weight: 600; }
+    .ticket-card { background: var(--bg3); border: 0.5px solid var(--border); border-left-width: 3px; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+    .ticket-card-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .ticket-card-title { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text); }
+    .ticket-card-sub { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 3px; }
+    .ticket-device-badge { font-family: var(--mono); font-size: 9px; border-radius: 20px; padding: 3px 10px; letter-spacing: 0.1em; flex-shrink: 0; }
+    .ticket-code { font-family: var(--mono); font-size: 36px; font-weight: 700; letter-spacing: 0.18em; color: var(--text); text-align: center; line-height: 1; padding: 6px 0; cursor: pointer; }
+    .ticket-code-hint { font-family: var(--mono); font-size: 10px; color: var(--text3); text-align: center; margin-top: 6px; }
+    .ticket-redeem-btn { width: 100%; padding: 11px; font-family: var(--mono); font-size: 11px; color: var(--green); background: rgba(106,173,126,0.1); border: 0.5px solid rgba(106,173,126,0.25); border-radius: 9px; letter-spacing: 0.05em; -webkit-tap-highlight-color: transparent; transition: opacity 0.15s; }
+    .ticket-redeem-btn:active { opacity: 0.7; }
+    .ticket-history-card { background: var(--bg3); border: 0.5px solid var(--border); border-radius: 12px; padding: 13px 16px; display: flex; align-items: center; gap: 12px; }
+    .ticket-history-info { flex: 1; min-width: 0; }
+    .ticket-history-title { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+    .ticket-history-code { font-family: var(--mono); font-size: 10px; color: var(--text4); text-decoration: line-through; letter-spacing: 0.08em; margin-left: 8px; }
+    .ticket-history-sub { font-family: var(--mono); font-size: 9px; color: var(--text4); margin-top: 4px; }
+    .ticket-status-pill { font-family: var(--mono); font-size: 9px; border-radius: 20px; padding: 3px 10px; letter-spacing: 0.1em; flex-shrink: 0; }
+    .tickets-empty { padding: 40px 0; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text4); letter-spacing: 0.05em; }
+
     /* ── CLOCK WIDGET ───────────────────────────────────────────────────── */
     #clock-widget {
       padding: 20px 16px 16px;
@@ -1418,6 +1494,290 @@
     }
     .sync-what-yes { color: var(--text3); }
 
+    /* ── SHOP CATALOG ──────────────────────────────────────────────────── */
+    .shop-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--border2);
+      border: 0.5px solid var(--border2);
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 12px 12px 4px;
+    }
+    .shop-stat {
+      background: var(--bg3);
+      padding: 14px 10px;
+      text-align: center;
+    }
+    .shop-stat-num {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .shop-stat-lbl {
+      font-family: var(--mono);
+      font-size: 8px;
+      color: var(--text4);
+      letter-spacing: 0.06em;
+      line-height: 1.4;
+    }
+    .shop-band {
+      padding: 16px 16px 4px;
+    }
+    .shop-band-eyebrow {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: var(--text4);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .shop-band-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .shop-band-sub {
+      font-size: 13px;
+      color: var(--text3);
+    }
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 12px;
+    }
+    @media (min-width: 500px) { .cat-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 700px) { .cat-grid { grid-template-columns: repeat(4, 1fr); } }
+    .cat-card {
+      background: var(--bg3);
+      border: 0.5px solid var(--border2);
+      border-radius: 14px;
+      padding: 16px 14px;
+      min-height: 130px;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cat-card:active { background: var(--bg4); }
+    .cat-card.active { background: var(--bg4); border-color: var(--gold); }
+    .cat-card.add {
+      align-items: center;
+      justify-content: center;
+      color: var(--text4);
+      border-style: dashed;
+    }
+    .cat-card.add:active { color: var(--gold); }
+    .cat-idx {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text4);
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .cat-icon { margin-bottom: 8px; }
+    .cat-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .cat-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .cat-cap {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text4);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      flex: 1;
+    }
+    .cat-price {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--gold);
+      margin-top: 8px;
+    }
+    .cat-buy-panel {
+      margin: 0 12px 12px;
+      background: var(--bg3);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.28s ease, opacity 0.2s;
+      opacity: 0;
+    }
+    .cat-buy-panel.open { max-height: 400px; opacity: 1; }
+    .cat-buy-inner { padding: 18px; }
+    .cat-buy-item-lbl {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text3);
+      margin-bottom: 14px;
+      line-height: 1.6;
+    }
+    .cat-buy-confirm {
+      width: 100%;
+      height: 46px;
+      border-radius: 11px;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--green);
+      background: var(--green-bg);
+      border: 0.5px solid var(--green-border);
+      margin-top: 10px;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.15s;
+    }
+    .cat-buy-confirm:active { opacity: 0.7; }
+    .cat-buy-msg {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text3);
+      line-height: 1.6;
+    }
+    .shop-foot {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text4);
+      text-align: center;
+      padding: 8px 16px 20px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── SUMMARY MODAL ──────────────────────────────────────────────────── */
+    #summary-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 300;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    #summary-modal.open { opacity: 1; pointer-events: all; }
+    #summary-card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg3);
+      border-radius: 20px 20px 0 0;
+      border-top: 0.5px solid var(--border);
+      padding: 28px 24px calc(32px + var(--sab));
+    }
+    .sum-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+    .sum-title {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text4);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .sum-goal {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .sum-receipt {
+      border-top: 0.5px solid var(--border2);
+      border-bottom: 0.5px solid var(--border2);
+      margin-bottom: 20px;
+    }
+    .sum-rrow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 0.5px solid var(--border2);
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text3);
+    }
+    .sum-rrow:last-child { border-bottom: none; }
+    .sum-rrow b { color: var(--text); font-weight: 500; }
+    .sum-clips { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .sum-clip-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .sum-btns { display: flex; gap: 8px; }
+    .sum-btn {
+      flex: 1;
+      height: 48px;
+      border-radius: 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.07em;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.15s;
+    }
+    .sum-btn:active { opacity: 0.7; }
+    .sum-btn-spin { color: var(--green); background: var(--green-bg); border: 0.5px solid var(--green-border); }
+    .sum-btn-later { color: var(--text3); background: var(--bg4); border: 0.5px solid var(--border); }
+
+    /* ── COUNT TAP ZONE ─────────────────────────────────────────────────── */
+    #cw-tap-wrap {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    #cw-tap-wrap.visible { display: flex; }
+    .cw-tap-btn {
+      width: 100%;
+      height: 72px;
+      border-radius: 14px;
+      background: var(--bg3);
+      border: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.1s;
+      cursor: pointer;
+    }
+    .cw-tap-btn:active { background: var(--bg4); }
+    .cw-tap-count {
+      font-family: var(--mono);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+    .cw-tap-hint {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text4);
+      letter-spacing: 0.08em;
+    }
+    .cw-tap-undo {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text4);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     /* ── TABLET ADJUSTMENTS ────────────────────────────────────────────── */
     @media (min-width: 600px) {
       #goal-list { padding: 16px; gap: 12px; }
@@ -1488,6 +1848,15 @@
           <!-- break info -->
           <div class="cw-break-meta"    id="cw-break-meta"    style="display:none;"></div>
           <div class="cw-break-warning" id="cw-break-warning" style="display:none;"></div>
+
+          <!-- count tap zone — visible for count-type goals while punched in -->
+          <div id="cw-tap-wrap">
+            <button class="cw-tap-btn" onclick="cwTapCount(1)">
+              <span class="cw-tap-count" id="cw-tap-count">0</span>
+              <span class="cw-tap-hint">tap to count</span>
+            </button>
+            <button class="cw-tap-undo" onclick="cwTapCount(-1)">− undo</button>
+          </div>
 
           <!-- swipe-to-punch slider — shown when not punched in -->
           <div class="cw-slider-wrap" id="cw-slider-wrap">
@@ -1706,6 +2075,11 @@
   </div>
 
 </div><!-- /app -->
+
+  <!-- ── SUMMARY MODAL ── -->
+  <div id="summary-modal" onclick="if(event.target===this)closeSummaryModal()">
+    <div id="summary-card"></div>
+  </div>
 
   <!-- ── LOCKED SCREEN ── -->
   <div id="locked-screen">
@@ -2075,6 +2449,9 @@
   // GOALS LIST — driven by S
   // ══════════════════════════════════════════════════════════════════════
   function renderGoals() {
+    // always exit reorder mode when re-rendering
+    _reorderMode = false;
+    document.getElementById('reorder-bar')?.classList.remove('visible');
     const list  = document.getElementById('goal-list');
     const goals = S.goals().filter(g => g.kind !== 'blocker');
     if (!goals.length) { list.innerHTML = '<div class="list-empty">no goals yet — tap + to add one</div>'; return; }
@@ -2836,6 +3213,55 @@
 
 
   let _sessionInterval = null;
+  // ── SUMMARY MODAL ─────────────────────────────────────────────────────
+  function showSummaryModal(g, durationSecs, count, tierResult, drawnClips) {
+    const card = document.getElementById('summary-card');
+    if (!card) return;
+
+    const tierColors = { 'Best Day':'var(--blue)', 'Average Day':'var(--amber)', 'Minimum Viable Day':'var(--green)' };
+    const tierColor  = tierResult ? (tierColors[tierResult] || 'var(--text3)') : 'var(--text4)';
+    const tierLabel  = tierResult || 'Below Minimum';
+
+    const clipsHtml = drawnClips.length
+      ? drawnClips.map(c => `<span class="sum-clip-dot" style="background:${c.hex};"></span>`).join('') +
+        `<span style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-left:2px;">${drawnClips.length}</span>`
+      : '<span style="font-family:var(--mono);font-size:11px;color:var(--text4);">none</span>';
+
+    card.innerHTML = `
+      <div class="sum-handle"></div>
+      <div class="sum-title">session complete</div>
+      <div class="sum-goal">${g ? g.name : ''}</div>
+      <div class="sum-receipt">
+        <div class="sum-rrow"><span>Time elapsed</span><b>${fmtHrMin(durationSecs)}</b></div>
+        ${g && g.trackerType === 'count' ? `<div class="sum-rrow"><span>Final count</span><b>${count}</b></div>` : ''}
+        <div class="sum-rrow"><span>Tier reached</span><b style="color:${tierColor};">${tierLabel.toUpperCase()}</b></div>
+        <div class="sum-rrow"><span>Clips earned</span><div class="sum-clips">${clipsHtml}</div></div>
+      </div>
+      <div class="sum-btns">
+        ${tierResult ? `<button class="sum-btn sum-btn-spin" onclick="closeSummaryModal();switchClock('wheel')">spin →</button>` : ''}
+        <button class="sum-btn sum-btn-later" onclick="closeSummaryModal()">later</button>
+      </div>
+    `;
+
+    document.getElementById('summary-modal').classList.add('open');
+  }
+
+  function closeSummaryModal() {
+    document.getElementById('summary-modal').classList.remove('open');
+  }
+
+  // ── COUNT TAP ZONE ────────────────────────────────────────────────────
+  let _tapCount = 0;
+
+  function cwTapCount(delta) {
+    _tapCount = Math.max(0, _tapCount + delta);
+    const el = document.getElementById('cw-tap-count');
+    if (el) el.textContent = _tapCount;
+    // save count to active session
+    const act = S.active();
+    if (act) { act.count = _tapCount; S.saveActive(act); }
+  }
+
   // ── SWIPE-TO-PUNCH SLIDER ─────────────────────────────────────────────
   let _sliderGoalId  = null; // goal selected for punch-in
   let _sliderDragging = false;
@@ -2990,7 +3416,8 @@
       const todayKey  = S.today();
       const todaySecs = ((g.dailySecs && g.dailySecs[todayKey]) || 0) + focusSecs;
       const hasTiers  = g.mvdVal && g.bsdVal;
-      const pct       = hasTiers ? Math.min(100, (todaySecs / g.bsdVal) * 100) : Math.min(100, todaySecs / 3600 * 33);
+      const tierVal   = g.trackerType === 'count' ? (act.count || 0) : todaySecs;
+      const pct       = hasTiers ? Math.min(100, (tierVal / g.bsdVal) * 100) : Math.min(100, todaySecs / 3600 * 33);
       const fill = document.getElementById('cw-tiertrack-fill');
       if (fill) { fill.style.width = pct + '%'; fill.style.background = g.color || '#6aad7e'; }
       const mvdTick = document.getElementById('cw-tt-mvd');
@@ -3009,6 +3436,18 @@
         else if (todaySecs >= g.avVal)  label = 'Average Day';
         else if (todaySecs >= g.mvdVal) label = 'Minimum Viable Day';
         hint.textContent = label !== '—' ? '✓ ' + label : '';
+      }
+    }
+
+    // count tap zone — show for count-type goals while punched in
+    const tapWrap = document.getElementById('cw-tap-wrap');
+    if (tapWrap) {
+      const isCount = g && g.trackerType === 'count';
+      tapWrap.classList.toggle('visible', !!isCount);
+      if (isCount) {
+        _tapCount = act.count || 0;
+        const el = document.getElementById('cw-tap-count');
+        if (el) el.textContent = _tapCount;
       }
     }
 
@@ -3074,10 +3513,11 @@
       g.totalSecs           = (g.totalSecs || 0) + focusSecs;
 
       const todaySecs = g.dailySecs[todayKey];
+      const tierVal   = g.trackerType === 'count' ? (act.count || 0) : todaySecs;
       if (g.mvdVal && g.bsdVal) {
-        if      (todaySecs >= g.bsdVal) tierResult = { tier:'Best Day',          clips: g.bsdClips || 3 };
-        else if (todaySecs >= g.avVal)  tierResult = { tier:'Average Day',        clips: g.avClips  || 2 };
-        else if (todaySecs >= g.mvdVal) tierResult = { tier:'Minimum Viable Day', clips: g.mvdClips || 1 };
+        if      (tierVal >= g.bsdVal) tierResult = { tier:'Best Day',          clips: g.bsdClips || 3 };
+        else if (tierVal >= g.avVal)  tierResult = { tier:'Average Day',        clips: g.avClips  || 2 };
+        else if (tierVal >= g.mvdVal) tierResult = { tier:'Minimum Viable Day', clips: g.mvdClips || 1 };
       }
 
       const tierOrder = { 'Minimum Viable Day':1, 'Average Day':2, 'Best Day':3 };
@@ -3100,6 +3540,8 @@
         punchIn:      act.punchInAt,
         punchOut:     now,
         durationSecs: focusSecs,
+        count:        act.count || 0,
+        trackerType:  g.trackerType || 'time',
         tierResult:   tierResult ? tierResult.tier : null,
         clipsEarned:  drawnClips.length,
         clipsDrawn:   drawnClips,
@@ -3112,19 +3554,26 @@
       S.saveGoals(goals);
     }
 
+    const _sg = g, _sd = focusSecs, _sc = act.count || 0,
+          _st = tierResult ? tierResult.tier : null, _sl = drawnClips;
+
     S.saveActive(null);
+    _tapCount = 0;
     releaseWakeLock();
     stopSessionNotification();
     // restore slider
     _sliderGoalId = null;
     const sliderWrap = document.getElementById('cw-slider-wrap');
     const btnsWrap   = document.getElementById('cw-btns');
+    const tapWrap    = document.getElementById('cw-tap-wrap');
     if (sliderWrap) sliderWrap.style.display = '';
     if (btnsWrap)   btnsWrap.style.display   = 'none';
+    if (tapWrap)    tapWrap.classList.remove('visible');
     document.querySelectorAll('.goalcard.selected').forEach(c => c.classList.remove('selected'));
     setSliderGoal(null);
     updateSessionUI();
     renderGoals();
+    setTimeout(() => showSummaryModal(_sg, _sd, _sc, _st, _sl), 100);
   }
 
 
