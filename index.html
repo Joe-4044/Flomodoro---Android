@@ -2395,7 +2395,7 @@
   // ══════════════════════════════════════════════════════════════════════
   function renderGoals() {
     const list  = document.getElementById('goal-list');
-    const goals = S.goals();
+    const goals = S.goals().filter(g => g.kind !== 'blocker');
     if (!goals.length) { list.innerHTML = '<div class="list-empty">no goals yet — tap + to add one</div>'; return; }
 
     list.innerHTML = goals.map(g => {
@@ -3159,23 +3159,37 @@
         if (data.goals) {
           const goalsArr = Array.isArray(data.goals)
             ? data.goals
-            : Object.entries(data.goals).map(([id, g]) => ({
-                id:                 Number(id) || id,
-                name:               g.name,
-                color:              g.color,
-                kind:               'normal',
-                locked:             g.locked             || false,
-                patoWallet:         g.patoWallet         || 0,
-                patoStep:           g.patoStep           ?? 0.5,
-                patoDayInCycle:     g.patoDayInCycle     ?? 1,
-                patoMultiplier:     g.patoMultiplier     ?? 1,
-                patoLastEarnedDate: g.patoLastEarnedDate || null,
-                mvdVal:             g.mvdVal             || null,
-                avVal:              g.avVal              || null,
-                bsdVal:             g.bsdVal             || null,
-                dailySecs:          g.dailySecs          || {},
-                totalSecs:          g.totalFocusSecs     || 0,
-              }));
+            : Object.entries(data.goals).map(([id, g]) => {
+                if (g.kind === 'blocker') {
+                  return {
+                    id:               Number(id) || id,
+                    kind:             'blocker',
+                    name:             g.name,
+                    color:            g.color || '#cd8a3a',
+                    subtasks:         g.subtasks || [],
+                    locks:            g.locks || [],
+                    startsBlockingAt: g.startsBlockingAt || '21:00',
+                    lastCompletedAt:  g.lastCompletedAt  || null,
+                  };
+                }
+                return {
+                  id:                 Number(id) || id,
+                  name:               g.name,
+                  color:              g.color,
+                  kind:               'normal',
+                  locked:             g.locked             || false,
+                  patoWallet:         g.patoWallet         || 0,
+                  patoStep:           g.patoStep           ?? 0.5,
+                  patoDayInCycle:     g.patoDayInCycle     ?? 1,
+                  patoMultiplier:     g.patoMultiplier     ?? 1,
+                  patoLastEarnedDate: g.patoLastEarnedDate || null,
+                  mvdVal:             g.mvdVal             || null,
+                  avVal:              g.avVal              || null,
+                  bsdVal:             g.bsdVal             || null,
+                  dailySecs:          g.dailySecs          || {},
+                  totalSecs:          g.totalFocusSecs     || 0,
+                };
+              });
           S.saveGoals(goalsArr);
         }
         if (data.catalog) {
