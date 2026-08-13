@@ -2148,12 +2148,27 @@
       if (window.onFirebaseSession) window.onFirebaseSession(data);
     });
 
-    // ── listen for full state changes (multi-device sync) ─────────────────
+    // ── listen for full state changes ─────────────────────────────────────
     const stateRef = ref(db, '/');
     onValue(stateRef, (snapshot) => {
       const data = snapshot.val();
       if (window.onFirebaseState) window.onFirebaseState(data);
     });
+
+    // ── force sync — called when app is foregrounded ───────────────────────
+    window._fbForceSync = function() {
+      import("https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js")
+        .then(({ get }) => get(stateRef))
+        .then(snapshot => {
+          const data = snapshot.val();
+          if (data && window.onFirebaseState) {
+            // temporarily reset firstFirebaseRead so the handler treats this as a live update
+            window._fbForceSyncData = data;
+            if (window._applyAndRender) window._applyAndRender(data);
+          }
+        })
+        .catch(() => {});
+    };
 
     window._fbReady = true;
     if (window.onFirebaseReady) window.onFirebaseReady();
@@ -2370,7 +2385,7 @@
 
   // ── init ──────────────────────────────────────────────────────────────
   // Version stamp — bumping forces a full localStorage clear so stale data never wins over Firebase
-  const _APP_VERSION = 'v4.1';
+  const _APP_VERSION = 'v4.2';
   if (localStorage.getItem('fv4_version') !== _APP_VERSION) {
     ['fv4_goals','fv4_catalog','fv4_tickets','fv4_jar','fv4_wheel',
      'fv4_log','fv4_redemptions','fv4_seeded'].forEach(k => localStorage.removeItem(k));
@@ -3159,63 +3174,73 @@
       _firstFirebaseRead = false;
 
       if (data && (data.goals || data.catalog || data.wallet)) {
-        // Firebase has real state — always wins over local cache
-        if (data.goals) {
-          const goalsArr = Array.isArray(data.goals)
-            ? data.goals
-            : Object.entries(data.goals).map(([id, g]) => {
-                if (g.kind === 'blocker') {
-                  return {
-                    id:               Number(id) || id,
-                    kind:             'blocker',
-                    name:             g.name,
-                    color:            g.color || '#cd8a3a',
-                    subtasks:         g.subtasks || [],
-                    locks:            g.locks || [],
-                    startsBlockingAt: g.startsBlockingAt || '21:00',
-                    lastCompletedAt:  g.lastCompletedAt  || null,
-                  };
-                }
-                return {
-                  id:                 Number(id) || id,
-                  name:               g.name,
-                  color:              g.color,
-                  kind:               'normal',
-                  locked:             g.locked             || false,
-                  patoWallet:         g.patoWallet         || 0,
-                  patoStep:           g.patoStep           ?? 0.5,
-                  patoDayInCycle:     g.patoDayInCycle     ?? 1,
-                  patoMultiplier:     g.patoMultiplier     ?? 1,
-                  patoLastEarnedDate: g.patoLastEarnedDate || null,
-                  mvdVal:             g.mvdVal             || null,
-                  avVal:              g.avVal              || null,
-                  bsdVal:             g.bsdVal             || null,
-                  dailySecs:          g.dailySecs          || {},
-                  totalSecs:          g.totalFocusSecs     || 0,
-                };
-              });
-          S.saveGoals(goalsArr);
-        }
-        if (data.catalog) {
-          const catalogArr = Array.isArray(data.catalog) ? data.catalog : Object.values(data.catalog);
-          S.saveCatalog(catalogArr);
-        }
-        if (data.tickets) {
-          const ticketsArr = Array.isArray(data.tickets) ? data.tickets : Object.values(data.tickets);
-          S.saveTickets(ticketsArr);
-        }
-        if (data.jar) S.saveJar(data.jar);
-        // mark seeded so local seed doesn't overwrite on next boot
-        localStorage.setItem('fv4_seeded', 'true');
+        _applyFirebaseState(data);
         _doInit(true);
       } else {
-        // Firebase is empty — seed locally and push up
-        localStorage.removeItem('fv4_seeded'); // force fresh seed
+        localStorage.removeItem('fv4_seeded');
         _doInit(false);
         _fbPushFullState();
       }
+    } else {
+      // subsequent updates from PC — apply full state and re-render everything
+      if (!data) return;
+      _applyAndRender(data);
     }
   };
+
+  function _applyFirebaseGoals(rawGoals) {
+    const goalsArr = Array.isArray(rawGoals)
+      ? rawGoals
+      : Object.entries(rawGoals).map(([id, g]) => {
+          if (g.kind === 'blocker') {
+            return {
+              id:               Number(id) || id,
+              kind:             'blocker',
+              name:             g.name,
+              color:            g.color || '#cd8a3a',
+              subtasks:         g.subtasks || [],
+              locks:            g.locks || [],
+              startsBlockingAt: g.startsBlockingAt || '21:00',
+              lastCompletedAt:  g.lastCompletedAt  || null,
+            };
+          }
+          // preserve existing local fields (dailySecs, pato state) — only update from Firebase what PC owns
+          const existing = S.goalById(id) || {};
+          return {
+            ...existing,
+            id:                 Number(id) || id,
+            name:               g.name,
+            color:              g.color,
+            kind:               'normal',
+            locked:             g.locked             || false,
+            patoWallet:         g.patoWallet         ?? existing.patoWallet         ?? 0,
+            patoStep:           g.patoStep           ?? existing.patoStep           ?? 0.5,
+            patoDayInCycle:     g.patoDayInCycle     ?? existing.patoDayInCycle     ?? 1,
+            patoMultiplier:     g.patoMultiplier     ?? existing.patoMultiplier     ?? 1,
+            patoLastEarnedDate: g.patoLastEarnedDate ?? existing.patoLastEarnedDate ?? null,
+            mvdVal:             g.mvdVal             ?? existing.mvdVal             ?? null,
+            avVal:              g.avVal              ?? existing.avVal              ?? null,
+            bsdVal:             g.bsdVal             ?? existing.bsdVal            ?? null,
+            dailySecs:          existing.dailySecs   || g.dailySecs                || {},
+            totalSecs:          existing.totalSecs   || g.totalFocusSecs           || 0,
+          };
+        });
+    S.saveGoals(goalsArr);
+  }
+
+  function _applyFirebaseState(data) {
+    if (data.goals)   _applyFirebaseGoals(data.goals);
+    if (data.catalog) {
+      const catalogArr = Array.isArray(data.catalog) ? data.catalog : Object.values(data.catalog);
+      S.saveCatalog(catalogArr);
+    }
+    if (data.tickets) {
+      const ticketsArr = Array.isArray(data.tickets) ? data.tickets : Object.values(data.tickets);
+      S.saveTickets(ticketsArr);
+    }
+    if (data.jar) S.saveJar(data.jar);
+    localStorage.setItem('fv4_seeded', 'true');
+  }
 
   window.onFirebaseSession = function(data) {
     // mobile owns the session — no action needed
@@ -4316,6 +4341,27 @@
     renderBlockerPane();
     renderGoals(); // re-render goals in case lock state changed
   }
+
+  // ── Re-sync from Firebase when app is foregrounded ────────────────────
+  function _applyAndRender(data) {
+    if (!data) return;
+    _applyFirebaseState(data);
+    renderGoals();
+    if (document.getElementById('cp-jar')?.classList.contains('active'))      renderJarPane();
+    if (document.getElementById('cp-weekly')?.classList.contains('active'))   renderWeeklyPane();
+    if (document.getElementById('cp-tickets')?.classList.contains('active'))  renderTicketsPane();
+    if (document.getElementById('cp-blockers')?.classList.contains('active')) renderBlockerPane();
+    if (document.getElementById('cp-log')?.classList.contains('active'))      renderLogPane();
+    if (document.getElementById('panel-shop')?.classList.contains('active'))  renderShop();
+  }
+  window._applyAndRender = _applyAndRender;
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      if (S.active()) requestWakeLock();
+      if (window._fbForceSync) window._fbForceSync();
+    }
+  });
 
   // ── OFFLINE FALLBACK ──────────────────────────────────────────────────
   function setOfflineBanner(visible) {
