@@ -2369,9 +2369,13 @@
   })();
 
   // ── init ──────────────────────────────────────────────────────────────
-  // Clear any stale local state so Firebase is always the source of truth
-  ['fv4_goals','fv4_catalog','fv4_tickets','fv4_jar','fv4_wheel','fv4_log','fv4_redemptions'].forEach(k => localStorage.removeItem(k));
-  localStorage.removeItem('fv4_seeded');
+  // Version stamp — bumping forces a full localStorage clear so stale data never wins over Firebase
+  const _APP_VERSION = 'v4.1';
+  if (localStorage.getItem('fv4_version') !== _APP_VERSION) {
+    ['fv4_goals','fv4_catalog','fv4_tickets','fv4_jar','fv4_wheel',
+     'fv4_log','fv4_redemptions','fv4_seeded'].forEach(k => localStorage.removeItem(k));
+    localStorage.setItem('fv4_version', _APP_VERSION);
+  }
 
   // Don't seed yet — wait for Firebase to respond first.
   // onFirebaseState will either load remote state or fall back to seed.
