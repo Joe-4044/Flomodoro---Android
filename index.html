@@ -4281,7 +4281,7 @@
       const subtasksHtml = subtasks.map((s, i) => `
         <div class="hb-subtask${s.done?' done':''}" onclick="toggleBlockerSubtask('${b.id}', ${i})">
           <div class="hb-check">${s.done?'✓':''}</div>
-          <span>${s.text || s.name || 'Task '+(i+1)}</span>
+          <span>${s.label || s.text || s.name || 'Task '+(i+1)}</span>
         </div>`).join('');
       const locksHtml = locks.map(g => `
         <span class="hb-lock-chip" style="color:${active?'var(--red)':'var(--green)'};background:${active?'rgba(196,106,106,0.1)':'var(--green-bg)'};border:0.5px solid ${active?'rgba(196,106,106,0.3)':'var(--green-border)'};">
