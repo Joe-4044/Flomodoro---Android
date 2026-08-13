@@ -1874,6 +1874,163 @@
     .ptr-indicator.refreshing .ptr-spinner { display: block; animation: ptr-spin 0.7s linear infinite; }
     @keyframes ptr-spin { to { transform: rotate(360deg); } }
 
+    /* ── LOCKED SCREEN ─────────────────────────────────────────────────── */
+    #locked-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 500;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 32px;
+      text-align: center;
+    }
+    #locked-screen.visible { display: flex; }
+
+    .locked-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; max-width: 320px; }
+
+    .locked-icon svg {
+      width: 56px; height: 56px;
+      stroke: var(--text4);
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .locked-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .locked-sub {
+      font-size: 14px;
+      color: var(--text3);
+      line-height: 1.6;
+    }
+    .locked-waiting {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text4);
+      margin-top: 8px;
+    }
+    .locked-spinner {
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: ptr-spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    .locked-hint {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text4);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── SYNC PANEL ────────────────────────────────────────────────────── */
+    .sync-pane { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+    .sync-status-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      background: var(--green-bg);
+      border: 0.5px solid var(--green-border);
+      border-radius: 14px;
+      margin-bottom: 8px;
+    }
+    .sync-device-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+      animation: msbPulse 2s ease-in-out infinite;
+    }
+    .sync-status-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--green);
+    }
+    .sync-status-sub {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text3);
+      margin-top: 3px;
+    }
+
+    .sync-section-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text4);
+      padding: 4px 0;
+    }
+
+    .sync-card {
+      display: flex;
+      gap: 14px;
+      padding: 16px;
+      background: var(--bg3);
+      border: 0.5px solid var(--border2);
+      border-radius: 14px;
+    }
+    .sync-card-icon svg {
+      width: 24px; height: 24px;
+      stroke: var(--text3);
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+    .sync-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .sync-card-desc {
+      font-size: 13px;
+      color: var(--text3);
+      line-height: 1.5;
+    }
+
+    .sync-action-btn {
+      width: 100%;
+      height: 52px;
+      border-radius: 14px;
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.15s;
+    }
+    .sync-action-btn:active { opacity: 0.7; }
+    .sync-action-up {
+      color: var(--blue);
+      background: rgba(122,154,222,0.1);
+      border: 0.5px solid rgba(122,154,222,0.3);
+    }
+
+    .sync-what-list { display: flex; flex-direction: column; gap: 6px; }
+    .sync-what-row {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 6px 0;
+      border-bottom: 0.5px solid var(--border2);
+      letter-spacing: 0.03em;
+    }
+    .sync-what-yes { color: var(--text3); }
+
     /* ── TABLET ADJUSTMENTS ────────────────────────────────────────────── */
     @media (min-width: 600px) {
       #goal-list { padding: 16px; gap: 12px; }
@@ -1985,6 +2142,49 @@
 
     </div><!-- /panel-clock -->
 
+    <!-- SYNC TAB -->
+    <div class="tab-panel" id="panel-sync">
+      <div class="screen-header">
+        <span class="screen-title">Sync</span>
+      </div>
+      <div class="scroll-content">
+        <div class="sync-pane">
+
+          <div class="sync-status-card" id="sync-status-card">
+            <div class="sync-device-dot" id="sync-device-dot"></div>
+            <div class="sync-status-info">
+              <div class="sync-status-label" id="sync-status-label">Active on Android</div>
+              <div class="sync-status-sub" id="sync-status-sub">You can use Flomodoro freely</div>
+            </div>
+          </div>
+
+          <div class="sync-section-label">Sync Up to PC</div>
+          <div class="sync-card">
+            <div class="sync-card-icon">
+              <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg>
+            </div>
+            <div class="sync-card-body">
+              <div class="sync-card-title">Hand off to PC</div>
+              <div class="sync-card-desc">Transfers all your Android data to PC and locks this app. Use when switching back to your desktop.</div>
+            </div>
+          </div>
+          <button class="sync-action-btn sync-action-up" onclick="startSyncUp()">Sync Up → PC</button>
+
+          <div class="sync-section-label" style="margin-top:24px;">What syncs</div>
+          <div class="sync-what-list">
+            <div class="sync-what-row sync-what-yes">✓ Goals, tiers, pato wallets</div>
+            <div class="sync-what-row sync-what-yes">✓ Session log</div>
+            <div class="sync-what-row sync-what-yes">✓ Tickets</div>
+            <div class="sync-what-row sync-what-yes">✓ Rewards jar</div>
+            <div class="sync-what-row sync-what-yes">✓ Shop catalog</div>
+            <div class="sync-what-row sync-what-yes">✓ Wheel state</div>
+            <div class="sync-what-row sync-what-yes">✓ Habit blockers</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <!-- SHOP TAB -->
     <div class="tab-panel" id="panel-shop">
       <div class="screen-header">
@@ -2015,6 +2215,10 @@
     <button class="nav-btn" onclick="switchTab('shop', this)">
       <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
       <span>Shop</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('sync', this)">
+      <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      <span>Sync</span>
     </button>
   </nav>
 
@@ -2077,6 +2281,22 @@
     </div>
   </div>
 
+  <!-- ── LOCKED SCREEN ── -->
+  <div id="locked-screen">
+    <div class="locked-inner">
+      <div class="locked-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="locked-title">Flomodoro is on PC</div>
+      <div class="locked-sub">You synced up to PC. Sync down to use Flomodoro on this device.</div>
+      <div class="locked-waiting">
+        <div class="locked-spinner"></div>
+        <span>Waiting for PC to sync down…</span>
+      </div>
+      <div class="locked-hint">Or sync down manually from PC to continue here.</div>
+    </div>
+  </div>
+
   <!-- ── SESSION SCREEN ── -->
   <div id="session-screen">
 
@@ -2134,8 +2354,8 @@
 
   <!-- Firebase SDK -->
   <script type="module">
-  import { initializeApp }                from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
-  import { getDatabase, ref, set, get }   from "https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js";
+  import { initializeApp }              from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey:            "AIzaSyBHi-TrRw-IZLxXZY-ppbm5ZTP_rWOJxD0",
@@ -2153,42 +2373,36 @@
   function fbSet(path, value) { return set(ref(db, path), value ?? null); }
   function fbGet(path)        { return get(ref(db, path)).then(s => s.val()); }
 
-  // ── write helpers exposed to main script ─────────────────────────────
-  window.fbSyncSession = function(data) { fbSet('session', data || null); };
-
-  window.fbSyncState = function(data) {
-    fbSet('wallet',  data.wallet  ?? null);
-    fbSet('goals',   data.goals   ?? null);
-    fbSet('tickets', data.tickets ?? null);
-    fbSet('catalog', data.catalog ?? null);
-    fbSet('jar',     data.jar     ?? null);
-    fbSet('weekly',  data.weekly  ?? null);
+  // ── write syncState to Firebase (called on Sync Up) ───────────────────
+  window.fbWriteSyncState = function(state) {
+    return Promise.all([
+      fbSet('activeDevice', 'pc'),
+      fbSet('syncState', { ...state, syncedAt: Date.now(), syncedFrom: 'android' }),
+    ]);
   };
 
-  window.fbPushRedemption = function(r) { fbSet('redemptions/active', r ?? null); };
+  // ── read activeDevice + syncState (called on boot) ────────────────────
+  window.fbBootCheck = async function() {
+    const [activeDevice, syncState] = await Promise.all([
+      fbGet('activeDevice'),
+      fbGet('syncState'),
+    ]);
+    return { activeDevice, syncState };
+  };
 
-  // ── poll Firebase every 15 seconds ───────────────────────────────────
-  async function poll() {
-    try {
-      const [goals, jar, catalog, tickets] = await Promise.all([
-        fbGet('goals'), fbGet('jar'), fbGet('catalog'), fbGet('tickets')
-      ]);
-      if (window._applyAndRender) window._applyAndRender({ goals, jar, catalog, tickets });
-    } catch(e) {}
-  }
+  // ── write activeDevice = android + syncState from PC ──────────────────
+  window.fbClaimAndroid = async function() {
+    return fbGet('syncState');
+  };
 
-  window._fbForceSync = poll;
-
-  // ── initial load then start polling ──────────────────────────────────
-  poll().then(() => {
-    if (window.onFirebaseReady) window.onFirebaseReady();
+  // ── listen for activeDevice changes (so PC releasing token wakes Android) ─
+  onValue(ref(db, 'activeDevice'), snapshot => {
+    const val = snapshot.val();
+    if (window.onActiveDeviceChange) window.onActiveDeviceChange(val);
   });
-  setInterval(poll, 15000);
 
-  // also poll immediately when app is foregrounded
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') poll();
-  });
+  // ── write redemption for PC to process ───────────────────────────────
+  window.fbPushRedemption = function(r) { return fbSet('redemptions/active', r ?? null); };
 </script>
 
 <script>
@@ -2409,14 +2623,64 @@
     localStorage.setItem('fv4_version', _APP_VERSION);
   }
 
-  // ── init ──────────────────────────────────────────────────────────────
-  // _applyAndRender is called by the Firebase poll on first load.
-  // If Firebase hasn't responded in 3s, seed locally and render anyway.
-  let _initDone = false;
-  function _doInit() {
-    if (_initDone) return;
-    _initDone = true;
-    S.ensureSeed();
+  // ── BOOT ─────────────────────────────────────────────────────────────
+  // 1. Check Firebase for activeDevice token
+  // 2. If token is 'android' (or null) → load state and go live
+  // 3. If token is 'pc' → show locked screen
+  async function boot() {
+    try {
+      const { activeDevice, syncState } = await window.fbBootCheck();
+
+      if (activeDevice === 'pc') {
+        showLockedScreen();
+        return;
+      }
+
+      // Android is active (or no token yet — first time setup)
+      if (syncState && syncState.syncedFrom === 'pc') {
+        // import state synced down from PC
+        importSyncState(syncState);
+      } else {
+        S.ensureSeed();
+      }
+      // set token to android if not already set
+      if (!activeDevice) {
+        window.fbBootCheck && fbClaimToken();
+      }
+
+    } catch(e) {
+      // Firebase unreachable — boot from local state
+      S.ensureSeed();
+    }
+    goLive();
+  }
+
+  function fbClaimToken() {
+    // no-op here — token already set by Sync Down on PC side
+    // if first boot, activeDevice stays null which means android is live
+  }
+
+  function importSyncState(syncState) {
+    if (syncState.goals) {
+      const goalsArr = Array.isArray(syncState.goals)
+        ? syncState.goals
+        : Object.entries(syncState.goals).map(([id, g]) => ({ id: Number(id)||id, ...g }));
+      S.saveGoals(goalsArr);
+    }
+    if (syncState.catalog) {
+      const arr = Array.isArray(syncState.catalog) ? syncState.catalog : Object.values(syncState.catalog);
+      S.saveCatalog(arr);
+    }
+    if (syncState.tickets) {
+      const arr = Array.isArray(syncState.tickets) ? syncState.tickets : Object.values(syncState.tickets);
+      S.saveTickets(arr);
+    }
+    if (syncState.jar)  S.saveJar(syncState.jar);
+    if (syncState.log)  S.saveLog(Array.isArray(syncState.log) ? syncState.log : Object.values(syncState.log));
+    localStorage.setItem('fv4_seeded', 'true');
+  }
+
+  function goLive() {
     renderGoals();
     const act = S.active();
     if (act) {
@@ -2424,7 +2688,22 @@
       if (g) openSession(g.name, g.color || '#6aad7e');
     }
   }
-  setTimeout(_doInit, 3000); // fallback if Firebase is slow
+
+  // listen for PC releasing the token back to android
+  window.onActiveDeviceChange = function(val) {
+    if (val === 'android') {
+      // PC synced up — import fresh state and go live
+      window.fbBootCheck().then(({ syncState }) => {
+        if (syncState && syncState.syncedFrom === 'pc') importSyncState(syncState);
+        hideLockedScreen();
+        goLive();
+      });
+    } else if (val === 'pc') {
+      showLockedScreen();
+    }
+  };
+
+  boot();
 
   // ══════════════════════════════════════════════════════════════════════
   // GOALS LIST — driven by S
@@ -2499,7 +2778,6 @@
     const session = { goalId: g.id, goalName: g.name, goalColor: g.color||'#6aad7e',
                       punchInAt: Date.now(), breakActive:false, breakStartAt:null, breakUsedSecs:0 };
     S.saveActive(session);
-    _fbPushSession();
     renderGoals();
     openSession(g.name, g.color||'#6aad7e');
   }
@@ -2740,7 +3018,6 @@
     }
 
     S.saveGoals(goals);
-    _fbPushFullState();
     document.getElementById('goal-wizard-overlay').classList.remove('open');
     renderGoals();
   }
@@ -2839,7 +3116,6 @@
     const catalog = S.catalog();
     catalog.push(item);
     S.saveCatalog(catalog);
-    _fbPushFullState();
     document.getElementById('shop-wizard-overlay').classList.remove('open');
     renderShop();
   }
@@ -3039,7 +3315,6 @@
     // append any goals not in DOM (shouldn't happen but safe)
     goals.forEach(g => { if (!reordered.find(r => String(r.id) === String(g.id))) reordered.push(g); });
     S.saveGoals(reordered);
-    _fbPushFullState();
     renderGoals();
   }
 
@@ -3160,7 +3435,6 @@
         if (!g) return;
         if (!confirm(`Delete "${g.name}"? This cannot be undone.`)) return;
         S.saveGoals(S.goals().filter(go => String(go.id) !== String(gid)));
-        _fbPushFullState();
         renderGoals();
       }, 300);
     }
@@ -3181,111 +3455,17 @@
 
   // ── Firebase node update handler ──────────────────────────────────────
   // Accumulates node updates until we have enough to init, then stays live
-  // ── Firebase ready ──────────────────────────────────────────────────
-  window.onFirebaseReady = function() {};
-
-
-  function _applyFirebaseGoals(rawGoals) {
-    const goalsArr = Array.isArray(rawGoals)
-      ? rawGoals
-      : Object.entries(rawGoals).map(([id, g]) => {
-          if (g.kind === 'blocker') {
-            return {
-              id:               Number(id) || id,
-              kind:             'blocker',
-              name:             g.name,
-              color:            g.color || '#cd8a3a',
-              subtasks:         g.subtasks || [],
-              locks:            g.locks || [],
-              startsBlockingAt: g.startsBlockingAt || '21:00',
-              lastCompletedAt:  g.lastCompletedAt  || null,
-            };
-          }
-          // preserve existing local fields (dailySecs, pato state) — only update from Firebase what PC owns
-          const existing = S.goalById(id) || {};
-          return {
-            ...existing,
-            id:                 Number(id) || id,
-            name:               g.name,
-            color:              g.color,
-            kind:               'normal',
-            locked:             g.locked             || false,
-            patoWallet:         g.patoWallet         ?? existing.patoWallet         ?? 0,
-            patoStep:           g.patoStep           ?? existing.patoStep           ?? 0.5,
-            patoDayInCycle:     g.patoDayInCycle     ?? existing.patoDayInCycle     ?? 1,
-            patoMultiplier:     g.patoMultiplier     ?? existing.patoMultiplier     ?? 1,
-            patoLastEarnedDate: g.patoLastEarnedDate ?? existing.patoLastEarnedDate ?? null,
-            mvdVal:             g.mvdVal             ?? existing.mvdVal             ?? null,
-            avVal:              g.avVal              ?? existing.avVal              ?? null,
-            bsdVal:             g.bsdVal             ?? existing.bsdVal            ?? null,
-            dailySecs:          existing.dailySecs   || g.dailySecs                || {},
-            totalSecs:          existing.totalSecs   || g.totalFocusSecs           || 0,
-          };
-        });
-    S.saveGoals(goalsArr);
-  }
-
-  function _applyFirebaseState(data) {
-    if (data.goals)   _applyFirebaseGoals(data.goals);
-    if (data.catalog) {
-      const catalogArr = Array.isArray(data.catalog) ? data.catalog : Object.values(data.catalog);
-      S.saveCatalog(catalogArr);
-    }
-    if (data.tickets) {
-      const ticketsArr = Array.isArray(data.tickets) ? data.tickets : Object.values(data.tickets);
-      S.saveTickets(ticketsArr);
-    }
-    if (data.jar) S.saveJar(data.jar);
-    localStorage.setItem('fv4_seeded', 'true');
-  }
 
 
 
-  function _fbPushSession() {
-    if (!window.fbSyncSession) return;
-    const act = S.active();
-    window.fbSyncSession(act ? {
-      active:        true,
-      goalId:        act.goalId,
-      goalName:      act.goalName,
-      goalColor:     act.goalColor,
-      startedAt:     act.punchInAt,
-      breakActive:   act.breakActive   || false,
-      breakStartedAt:act.breakStartAt  || null,
-      breakUsedSecs: act.breakUsedSecs || 0,
-      device:        'mobile',
-    } : null);
-  }
 
-  function _fbPushFullState() {
-    if (!window.fbSyncState) return;
-    const goals = S.goals();
-    const pato  = S.totalPato();
-    window.fbSyncState({
-      wallet:  { pato, tickets: S.tickets().filter(t=>t.status==='active').length },
-      goals:   Object.fromEntries(goals.map(g => [g.id, {
-        name:               g.name,
-        color:              g.color,
-        locked:             g.locked             || false,
-        totalFocusSecs:     g.totalSecs          || 0,
-        patoWallet:         g.patoWallet         || 0,
-        patoStep:           g.patoStep           ?? 0.5,
-        patoDayInCycle:     g.patoDayInCycle     ?? 1,
-        patoMultiplier:     g.patoMultiplier     ?? 1,
-        patoLastEarnedDate: g.patoLastEarnedDate || null,
-        mvdVal:             g.mvdVal             || null,
-        avVal:              g.avVal              || null,
-        bsdVal:             g.bsdVal             || null,
-        dailySecs:          g.dailySecs          || {},
-      }])),
-      tickets: S.tickets(),
-      catalog: S.catalog(),
-      jar:     S.jar(),
-      wheel:   (() => { const gs = S.goals(); const w = {}; gs.forEach(g => { w[g.id] = S.wheel(g.id); }); return w; })(),
-      weekly:  { weekStartDate: S.today(), goals: goals.map(g=>({ name:g.name, secs:g.totalSecs||0 })) },
-    });
-    _fbPushSession();
-  }
+
+
+
+
+
+
+
   let _sessionInterval = null;
   function openSession(goalName, goalColor) {
     const act = S.active(); if (!act) return;
@@ -3358,7 +3538,7 @@
   function onBreakBtn() {
     const act = S.active(); if (!act) return;
     act.breakActive = true; act.breakStartAt = Date.now();
-    S.saveActive(act); _fbPushSession(); updateSessionUI();
+    S.saveActive(act); updateSessionUI();
   }
 
   function onFocusBtn() {
@@ -3366,7 +3546,7 @@
     const spent = Math.floor((Date.now() - (act.breakStartAt || Date.now())) / 1000);
     act.breakUsedSecs = (act.breakUsedSecs || 0) + spent;
     act.breakActive = false; act.breakStartAt = null;
-    S.saveActive(act); _fbPushSession(); updateSessionUI();
+    S.saveActive(act); updateSessionUI();
   }
 
   function onPunchOut() {
@@ -3433,8 +3613,6 @@
     S.saveActive(null);
     releaseWakeLock();
     stopSessionNotification();
-    _fbPushSession();
-    _fbPushFullState();
     document.getElementById('session-screen').classList.remove('open');
     renderGoals();
   }
@@ -3676,8 +3854,6 @@
           S.saveTickets(tickets);
         }
       }
-
-      _fbPushFullState();
       renderWheelPane();
       showSpinResultModal(outcome, ticket, g);
     }, 4400);
@@ -3779,7 +3955,6 @@
     if (!item || bal < price) return;
     S.spendPato(price);
     S.addRedemption({ itemId: item.id, itemName: item.name, price });
-    _fbPushFullState();
     _buyOpenId = null;
     renderShop();
   }
@@ -3894,11 +4069,10 @@
     document.getElementById('panel-' + tab).classList.add('active');
     btn.classList.add('active');
     if (tab === 'shop') renderShop();
+    if (tab === 'sync') renderSyncPane();
   };
 
-  function _fbPushRedemption(redemption) {
-    if (window.fbPushRedemption) window.fbPushRedemption(redemption);
-  }
+
 
   function redeemTicket(code) {
     const tickets = S.tickets();
@@ -3909,15 +4083,14 @@
     t.redeemedAt = Date.now();
     S.saveTickets(tickets);
     // push redemption to Firebase — PC listener picks this up and calls performPcUnblock
-    _fbPushRedemption({
+    // ticket redemption — PC will pick this up on next Sync Down
+    if (window.fbPushRedemption) window.fbPushRedemption({
       code,
       rewardApp:    t.rewardApp    || '—',
       durationMins: t.durationMins || 30,
-      show:         t.show         || null,
       device:       'mobile',
       redeemedAt:   Date.now(),
     });
-    _fbPushFullState();
     renderTicketsPane();
   }
 
@@ -4240,7 +4413,6 @@
     };
     S.spendPato(tier.price);
     S.saveGoals(goals);
-    _fbPushFullState();
     renderGoals();
     renderShop();
     alert('Key Glass active — ' + g.name + ' unlocked for ' + tier.minutes + ' min.');
@@ -4259,7 +4431,6 @@
     };
     S.spendPato(20);
     S.saveGoals(goals);
-    _fbPushFullState();
     renderGoals();
     renderShop();
     alert('Key Shard used — ' + g.name + ' tracking unlocked until next cycle.');
@@ -4275,7 +4446,6 @@
     (blocker.subtasks || []).forEach(s => s.done = false);
     S.spendPato(50);
     S.saveGoals(goals);
-    _fbPushFullState();
     renderGoals();
     renderBlockerPane();
     alert('Keystone used — ' + blocker.name + ' cleared.');
@@ -4332,28 +4502,72 @@
       blocker.subtasks.forEach(s => s.done = false);
     }
     S.saveGoals(goals);
-    _fbPushFullState();
     renderBlockerPane();
     renderGoals(); // re-render goals in case lock state changed
   }
 
   // ── Re-sync from Firebase when app is foregrounded ────────────────────
-  function _applyAndRender(data) {
-    if (!data) return;
-    _applyFirebaseState(data);
-    if (!_initDone) {
-      _doInit();
-    } else {
-      renderGoals();
-      if (document.getElementById('cp-jar')?.classList.contains('active'))      renderJarPane();
-      if (document.getElementById('cp-weekly')?.classList.contains('active'))   renderWeeklyPane();
-      if (document.getElementById('cp-tickets')?.classList.contains('active'))  renderTicketsPane();
-      if (document.getElementById('cp-blockers')?.classList.contains('active')) renderBlockerPane();
-      if (document.getElementById('cp-log')?.classList.contains('active'))      renderLogPane();
-      if (document.getElementById('panel-shop')?.classList.contains('active'))  renderShop();
+
+
+  // ── SYNC PANE ─────────────────────────────────────────────────────────
+  function renderSyncPane() {
+    // update status card to show last sync info
+    const label = document.getElementById('sync-status-label');
+    const sub   = document.getElementById('sync-status-sub');
+    if (label) label.textContent = 'Active on Android';
+    if (sub)   sub.textContent   = 'You can use Flomodoro freely';
+  }
+
+  // ── SYNC UP ───────────────────────────────────────────────────────────
+  async function startSyncUp() {
+    const confirmed = confirm(
+      'Sync Up to PC?\n\n' +
+      'This will:\n' +
+      '• Transfer all your data to PC\n' +
+      '• Lock Flomodoro Android\n' +
+      '• Reactivate Flomodoro PC\n\n' +
+      'Proceed?'
+    );
+    if (!confirmed) return;
+
+    // show syncing state
+    const btn = document.querySelector('.sync-action-up');
+    if (btn) { btn.textContent = 'Syncing…'; btn.disabled = true; }
+
+    try {
+      // build full state snapshot
+      const goals   = S.goals();
+      const catalog = S.catalog();
+      const tickets = S.tickets();
+      const jar     = S.jar();
+      const log     = S.log();
+
+      const state = {
+        goals:   Object.fromEntries(goals.map(g => [g.id, g])),
+        catalog: Object.fromEntries(catalog.map(c => [c.id, c])),
+        tickets: Object.fromEntries(tickets.map((t,i) => [i, t])),
+        jar,
+        log:     Object.fromEntries(log.map((e,i) => [i, e])),
+      };
+
+      await window.fbWriteSyncState(state);
+      showLockedScreen();
+    } catch(e) {
+      alert('Sync failed — check your connection and try again.');
+      if (btn) { btn.textContent = 'Sync Up → PC'; btn.disabled = false; }
     }
   }
-  window._applyAndRender = _applyAndRender;
+
+  function showLockedScreen() {
+    document.getElementById('locked-screen').classList.add('visible');
+    // hide main app UI
+    document.getElementById('app').style.display = 'none';
+  }
+
+  function hideLockedScreen() {
+    document.getElementById('locked-screen').classList.remove('visible');
+    document.getElementById('app').style.display = '';
+  }
 
   // ── PULL TO REFRESH ───────────────────────────────────────────────────
   (function() {
@@ -4389,12 +4603,15 @@
         el.classList.add('visible', 'refreshing');
         ptrLabel().textContent = 'refreshing…';
       }
-      // poll Firebase
-      if (window._fbForceSync) {
-        await new Promise(r => setTimeout(r, 800)); // min visual time
-        window._fbForceSync();
-        await new Promise(r => setTimeout(r, 600));
-      }
+      await new Promise(r => setTimeout(r, 600));
+      // re-render current visible screens from local state
+      renderGoals();
+      if (document.getElementById('cp-jar')?.classList.contains('active'))      renderJarPane();
+      if (document.getElementById('cp-weekly')?.classList.contains('active'))   renderWeeklyPane();
+      if (document.getElementById('cp-tickets')?.classList.contains('active'))  renderTicketsPane();
+      if (document.getElementById('cp-blockers')?.classList.contains('active')) renderBlockerPane();
+      if (document.getElementById('cp-log')?.classList.contains('active'))      renderLogPane();
+      if (document.getElementById('panel-shop')?.classList.contains('active'))  renderShop();
       ptrHide();
       _ptrRefreshing = false;
     }
