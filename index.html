@@ -1475,6 +1475,378 @@
     .reorder-mode .gc-drag-handle { display: block; }
     .reorder-mode .gc-actions { display: none; }
 
+    /* ── WIZARD MODAL ──────────────────────────────────────────────────── */
+    .wizard-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 400;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .wizard-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .wizard-sheet {
+      width: 100%;
+      max-width: 560px;
+      background: var(--bg2);
+      border-radius: 20px 20px 0 0;
+      border-top: 0.5px solid var(--border);
+      max-height: 92dvh;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.32s cubic-bezier(0.32,0.72,0,1);
+      padding-bottom: var(--sab);
+    }
+    .wizard-overlay.open .wizard-sheet { transform: translateY(0); }
+
+    .wizard-handle {
+      width: 36px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 12px auto 0;
+      flex-shrink: 0;
+    }
+    .wizard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px 12px;
+      border-bottom: 0.5px solid var(--border2);
+      flex-shrink: 0;
+    }
+    .wizard-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text3);
+    }
+    .wizard-close {
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 8px;
+      color: var(--text4);
+      font-size: 18px;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
+    }
+    .wizard-close:active { background: var(--bg4); }
+
+    .wizard-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .wiz-group { display: flex; flex-direction: column; gap: 8px; }
+    .wiz-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text4);
+    }
+    .wiz-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 0.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+      box-sizing: border-box;
+    }
+    .wiz-input:focus { border-color: var(--green); }
+    .wiz-input::placeholder { color: var(--text4); }
+
+    .wiz-seg {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg3);
+      border: 0.5px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .wiz-seg-btn {
+      padding: 10px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: var(--text3);
+      border-right: 0.5px solid var(--border2);
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wiz-seg-btn:last-child { border-right: none; }
+    .wiz-seg-btn.active { background: var(--bg4); color: var(--text); font-weight: 600; }
+
+    .wiz-tier-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .wiz-tier-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      width: 28px;
+      flex-shrink: 0;
+    }
+    .wiz-tier-input {
+      flex: 1;
+      background: var(--bg3);
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+      box-sizing: border-box;
+    }
+    .wiz-tier-input:focus { border-color: var(--green); }
+
+    .wiz-clips-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .wiz-clips-btn {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      background: var(--bg4);
+      border: 0.5px solid var(--border);
+      color: var(--text2);
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.1s;
+    }
+    .wiz-clips-btn:active { background: var(--bg); }
+    .wiz-clips-val {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text);
+      min-width: 16px;
+      text-align: center;
+    }
+
+    .wiz-color-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .wiz-swatch {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 2.5px solid transparent;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wiz-swatch.picked { border-color: white; transform: scale(1.15); }
+
+    .wiz-reward-block {
+      background: var(--bg3);
+      border: 0.5px solid var(--border2);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .wiz-reward-tier-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .wiz-reward-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg4);
+      border: 0.5px solid var(--border);
+      border-radius: 7px;
+      overflow: hidden;
+    }
+    .wiz-reward-toggle-btn {
+      padding: 7px;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text3);
+      border-right: 0.5px solid var(--border2);
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wiz-reward-toggle-btn:last-child { border-right: none; }
+    .wiz-reward-toggle-btn.active { background: var(--bg2); color: var(--text); }
+
+    .wiz-select {
+      width: 100%;
+      background: var(--bg3);
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text);
+      outline: none;
+      appearance: none;
+      box-sizing: border-box;
+    }
+
+    .wizard-footer {
+      padding: 12px 20px 16px;
+      border-top: 0.5px solid var(--border2);
+      flex-shrink: 0;
+    }
+    .wiz-save-btn {
+      width: 100%;
+      height: 52px;
+      border-radius: 14px;
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: var(--green);
+      background: var(--green-bg);
+      border: 0.5px solid var(--green-border);
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.15s;
+    }
+    .wiz-save-btn:active { opacity: 0.7; }
+
+    /* ── HABIT BLOCKER UI ──────────────────────────────────────────────── */
+    .blocker-pane { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+    .hb-card {
+      background: var(--bg3);
+      border: 0.5px solid var(--border2);
+      border-left: 3px solid var(--amber);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .hb-card.cleared { border-left-color: var(--green); }
+
+    .hb-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 14px 10px;
+    }
+    .hb-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .hb-name {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .hb-status-pill {
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+
+    .hb-bar {
+      height: 3px;
+      background: var(--bg4);
+      margin: 0 14px 10px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .hb-bar-fill { height: 100%; background: var(--amber); border-radius: 2px; transition: width 0.3s; }
+    .hb-card.cleared .hb-bar-fill { background: var(--green); }
+
+    .hb-subtasks { padding: 0 14px 10px; display: flex; flex-direction: column; gap: 6px; }
+    .hb-subtask {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text2);
+      padding: 4px 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hb-subtask.done { color: var(--text4); text-decoration: line-through; }
+    .hb-check {
+      width: 18px; height: 18px;
+      border-radius: 5px;
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 11px;
+      color: var(--green);
+      background: transparent;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .hb-subtask.done .hb-check { background: var(--green-bg); border-color: var(--green-border); }
+
+    .hb-footer {
+      padding: 10px 14px 12px;
+      border-top: 0.5px solid var(--border2);
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text4);
+      letter-spacing: 0.06em;
+    }
+    .hb-locks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .hb-lock-chip {
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: 0.06em;
+    }
+
+    .hb-empty {
+      padding: 48px 20px;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text4);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── OFFLINE BANNER ────────────────────────────────────────────────── */
+    #offline-banner {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(205,138,58,0.12);
+      border-bottom: 0.5px solid var(--amber-border);
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--amber);
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+    #offline-banner.visible { display: flex; }
+
     /* ── TABLET ADJUSTMENTS ────────────────────────────────────────────── */
     @media (min-width: 600px) {
       #goal-list { padding: 16px; gap: 12px; }
@@ -1492,6 +1864,9 @@
 <body>
 <div id="app">
 
+  <!-- ── OFFLINE BANNER ── -->
+  <div id="offline-banner">⚠ offline — showing last saved state</div>
+
   <!-- ── MAIN CONTENT ── -->
   <div id="main">
 
@@ -1502,7 +1877,7 @@
       <div class="screen-header">
         <span class="screen-title">Clock</span>
         <div class="header-actions">
-          <button class="icon-btn" title="Add goal">
+          <button class="icon-btn" title="Add goal" onclick="openGoalWizard()">
             <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
         </div>
@@ -1516,6 +1891,7 @@
         <button class="subnav-btn" onclick="switchClock('jar')">Rewards Jar</button>
         <button class="subnav-btn" onclick="switchClock('weekly')">Weekly</button>
         <button class="subnav-btn" onclick="switchClock('tickets')">Tickets</button>
+        <button class="subnav-btn" onclick="switchClock('blockers')">Blockers</button>
       </div>
 
       <!-- goals sub-panel (default) -->
@@ -1567,6 +1943,13 @@
         </div>
       </div>
 
+      <!-- blockers sub-panel -->
+      <div class="clock-panel" id="cp-blockers">
+        <div class="scroll-content">
+          <div class="blocker-pane" id="blocker-pane-inner"></div>
+        </div>
+      </div>
+
     </div><!-- /panel-clock -->
 
     <!-- SHOP TAB -->
@@ -1601,6 +1984,36 @@
       <span>Shop</span>
     </button>
   </nav>
+
+  <!-- ── GOAL WIZARD (add / edit) ── -->
+  <div class="wizard-overlay" id="goal-wizard-overlay" onclick="closeGoalWizard(event)">
+    <div class="wizard-sheet">
+      <div class="wizard-handle"></div>
+      <div class="wizard-header">
+        <span class="wizard-title" id="goal-wizard-title">New Goal</span>
+        <button class="wizard-close" onclick="closeGoalWizard()">×</button>
+      </div>
+      <div class="wizard-body" id="goal-wizard-body"></div>
+      <div class="wizard-footer">
+        <button class="wiz-save-btn" id="goal-wizard-save-btn" onclick="saveGoalWizard()">Create Goal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SHOP ADD ITEM WIZARD ── -->
+  <div class="wizard-overlay" id="shop-wizard-overlay" onclick="closeShopWizard(event)">
+    <div class="wizard-sheet">
+      <div class="wizard-handle"></div>
+      <div class="wizard-header">
+        <span class="wizard-title">Add Item</span>
+        <button class="wizard-close" onclick="closeShopWizard()">×</button>
+      </div>
+      <div class="wizard-body" id="shop-wizard-body"></div>
+      <div class="wizard-footer">
+        <button class="wiz-save-btn" onclick="saveShopWizard()">Add to Catalog</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ── BOTTOM SHEET ── -->
   <div id="bottom-sheet-overlay" onclick="closeSheet()"></div>
@@ -2073,6 +2486,390 @@
     event.currentTarget.classList.add('active');
   }
 
+  // ── WIZARD HELPERS ────────────────────────────────────────────────────
+  const GOAL_COLORS = ['#6aad7e','#7a9ade','#cd8a3a','#c46a6a','#9a7ade','#5aadcd','#d9b44a','#ad6aad'];
+  const ANDROID_APPS = ['YouTube','Instagram','Snapchat','X','TikTok','Clash of Clans','Clash Royale','Good Pizza Great Pizza'];
+  const DURS = [5,10,15,20,25,30,45,60,90,120];
+
+  function parseTierVal(raw, trackerType) {
+    if (!raw) return 0;
+    raw = raw.trim();
+    if (trackerType === 'time') {
+      const parts = raw.split(':');
+      if (parts.length === 2) return parseInt(parts[0]||0)*3600 + parseInt(parts[1]||0)*60;
+      return parseInt(raw) * 60;
+    }
+    return parseInt(raw) || 0;
+  }
+
+  function fmtTierVal(val, trackerType) {
+    if (trackerType === 'time') {
+      const h = Math.floor(val / 3600);
+      const m = Math.floor((val % 3600) / 60);
+      return h + ':' + String(m).padStart(2,'0');
+    }
+    return String(val);
+  }
+
+  // ── GOAL WIZARD ───────────────────────────────────────────────────────
+  let _gwGoalId    = null; // null = new, else editing
+  let _gwColor     = GOAL_COLORS[0];
+  let _gwTracker   = 'time';
+  let _gwClips     = { mvd:1, av:2, bsd:3 };
+  let _gwRewards   = { 1:'ticket', 2:'ticket', 3:'ticket', 4:'ticket' };
+
+  function openGoalWizard(goalId) {
+    _gwGoalId  = goalId || null;
+    const g    = goalId ? S.goalById(goalId) : null;
+    _gwColor   = g ? g.color : GOAL_COLORS[0];
+    _gwTracker = g ? (g.trackerType || 'time') : 'time';
+    _gwClips   = { mvd: g ? (g.mvdClips||1) : 1, av: g ? (g.avClips||2) : 2, bsd: g ? (g.bsdClips||3) : 3 };
+    _gwRewards = {
+      1: g ? (g.reward1Type||'ticket') : 'ticket',
+      2: g ? (g.reward2Type||'ticket') : 'ticket',
+      3: g ? (g.reward3Type||'ticket') : 'ticket',
+      4: g ? (g.reward4Type||'ticket') : 'ticket',
+    };
+
+    document.getElementById('goal-wizard-title').textContent = g ? 'Edit Goal' : 'New Goal';
+    document.getElementById('goal-wizard-save-btn').textContent = g ? 'Save Changes' : 'Create Goal';
+    renderGoalWizardBody(g);
+    document.getElementById('goal-wizard-overlay').classList.add('open');
+  }
+
+  function closeGoalWizard(e) {
+    if (e && e.target !== document.getElementById('goal-wizard-overlay')) return;
+    document.getElementById('goal-wizard-overlay').classList.remove('open');
+  }
+
+  function gwSetTracker(type) {
+    _gwTracker = type;
+    document.querySelectorAll('.gw-tracker-btn').forEach(b => b.classList.toggle('active', b.dataset.t === type));
+    document.querySelectorAll('.gw-tier-input').forEach(inp => {
+      inp.placeholder = type === 'time' ? (inp.dataset.ph_time||'0:30') : (inp.dataset.ph_count||'10');
+    });
+  }
+
+  function gwStepClips(tier, delta) {
+    _gwClips[tier] = Math.min(9, Math.max(1, (_gwClips[tier]||1) + delta));
+    const disp = document.getElementById('gw-clips-' + tier);
+    if (disp) disp.textContent = _gwClips[tier];
+  }
+
+  function gwSetRewardMode(n, mode) {
+    _gwRewards[n] = mode;
+    const manual = document.getElementById('gw-r'+n+'-manual');
+    const ticket = document.getElementById('gw-r'+n+'-ticket');
+    if (manual) manual.style.display = mode === 'ticket' ? 'none' : 'block';
+    if (ticket) ticket.style.display = mode === 'ticket' ? 'flex' : 'none';
+    document.querySelectorAll(`.gw-rtoggle-${n}`).forEach(b => b.classList.toggle('active', b.dataset.m === mode));
+  }
+
+  function gwPickColor(color) {
+    _gwColor = color;
+    document.querySelectorAll('.wiz-swatch').forEach(s => s.classList.toggle('picked', s.dataset.c === color));
+  }
+
+  function renderGoalWizardBody(g) {
+    const isTime = _gwTracker === 'time';
+    const ph = isTime ? '0:15' : '5';
+
+    const tierBlocks = [
+      { key:'mvd', n:1, label:'T1 · MVD',     color:'#6aad7e', phT:'0:15', phC:'5'  },
+      { key:'av',  n:2, label:'T2 · AVG',      color:'#7a9ade', phT:'0:30', phC:'10' },
+      { key:'bsd', n:3, label:'T3 · BEST DAY', color:'#cd8a3a', phT:'0:45', phC:'15' },
+      { key:'jp',  n:4, label:'★ JACKPOT',     color:'#d9b44a', phT:null,   phC:null },
+    ].map(({ key, n, label, color, phT, phC }) => {
+      const rMode = _gwRewards[n];
+      const rApp  = g ? (g['reward'+n+'App'] || ANDROID_APPS[0]) : ANDROID_APPS[0];
+      const rDur  = g ? (g['reward'+n+'Dur'] || 30) : 30;
+      const rTxt  = g ? (g['reward'+n] || '') : '';
+      const appOpts = ANDROID_APPS.map(a => `<option value="${a}"${rApp===a?' selected':''}>${a}</option>`).join('');
+      const durOpts = DURS.map(d => `<option value="${d}"${rDur==d?' selected':''}>${d>=60?d/60+' hr':d+' min'}</option>`).join('');
+      const isJP = key === 'jp';
+      return `
+        <div class="wiz-reward-block">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span class="wiz-reward-tier-label" style="color:${color};">${label}</span>
+            <div class="wiz-reward-toggle">
+              <button class="wiz-reward-toggle-btn gw-rtoggle-${n}${rMode==='manual'?' active':''}" data-m="manual" onclick="gwSetRewardMode(${n},'manual')">Manual</button>
+              <button class="wiz-reward-toggle-btn gw-rtoggle-${n}${rMode==='ticket'?' active':''}" data-m="ticket" onclick="gwSetRewardMode(${n},'ticket')">Ticket</button>
+            </div>
+          </div>
+          ${!isJP ? `
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="wiz-tier-label" style="color:${color};">${key.toUpperCase()}</span>
+            <input class="wiz-tier-input gw-tier-input" id="gw-${key}-val" data-ph_time="${phT}" data-ph_count="${phC}" placeholder="${isTime?phT:phC}" value="${g&&g[key+'Val']?fmtTierVal(g[key+'Val'],_gwTracker):''}">
+            <div class="wiz-clips-ctrl">
+              <button class="wiz-clips-btn" onclick="gwStepClips('${key}',-1)">−</button>
+              <span class="wiz-clips-val" id="gw-clips-${key}">${_gwClips[key]}</span>
+              <button class="wiz-clips-btn" onclick="gwStepClips('${key}',1)">+</button>
+            </div>
+          </div>` : `<div style="font-family:var(--mono);font-size:9px;color:var(--text4);">2% chance — unlocks behind T3 ceiling</div>`}
+          <div id="gw-r${n}-manual" style="display:${rMode==='ticket'?'none':'block'};">
+            <input class="wiz-input" id="gw-r${n}" type="text" placeholder="describe the reward…" value="${rTxt}">
+          </div>
+          <div id="gw-r${n}-ticket" style="display:${rMode==='ticket'?'flex':'none'};gap:10px;">
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+              <span class="wiz-label">App</span>
+              <select class="wiz-select" id="gw-r${n}-app">${appOpts}</select>
+            </div>
+            <div style="width:90px;display:flex;flex-direction:column;gap:6px;">
+              <span class="wiz-label">Duration</span>
+              <select class="wiz-select" id="gw-r${n}-dur">${durOpts}</select>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    const swatches = GOAL_COLORS.map(c =>
+      `<div class="wiz-swatch${c===_gwColor?' picked':''}" data-c="${c}" style="background:${c};" onclick="gwPickColor('${c}')"></div>`
+    ).join('');
+
+    document.getElementById('goal-wizard-body').innerHTML = `
+      <div class="wiz-group">
+        <label class="wiz-label">Goal Name</label>
+        <input class="wiz-input" id="gw-name" type="text" maxlength="40" placeholder="e.g. Study" value="${g?g.name:''}">
+      </div>
+      <div class="wiz-group">
+        <label class="wiz-label">Tracker Type</label>
+        <div class="wiz-seg">
+          <button class="wiz-seg-btn gw-tracker-btn${_gwTracker==='time'?' active':''}" data-t="time" onclick="gwSetTracker('time')">Time based</button>
+          <button class="wiz-seg-btn gw-tracker-btn${_gwTracker==='count'?' active':''}" data-t="count" onclick="gwSetTracker('count')">Count based</button>
+        </div>
+      </div>
+      <div class="wiz-group">
+        <label class="wiz-label">Tiers · Threshold → Clips</label>
+        ${tierBlocks}
+      </div>
+      <div class="wiz-group">
+        <label class="wiz-label">Pato Multiplier Step</label>
+        <input class="wiz-input" id="gw-pato-step" type="number" min="0.1" step="0.1" placeholder="0.5" value="${g&&g.patoStep!=null?g.patoStep:0.5}" style="max-width:100px;">
+      </div>
+      <div class="wiz-group">
+        <label class="wiz-label">Colour</label>
+        <div class="wiz-color-row">${swatches}</div>
+      </div>
+    `;
+  }
+
+  function saveGoalWizard() {
+    const name = (document.getElementById('gw-name').value || '').trim();
+    if (!name) { document.getElementById('gw-name').focus(); return; }
+
+    const mvdRaw = document.getElementById('gw-mvd-val')?.value || '';
+    const avRaw  = document.getElementById('gw-av-val')?.value  || '';
+    const bsdRaw = document.getElementById('gw-bsd-val')?.value || '';
+    const mvdVal = parseTierVal(mvdRaw, _gwTracker);
+    const avVal  = parseTierVal(avRaw,  _gwTracker);
+    const bsdVal = parseTierVal(bsdRaw, _gwTracker);
+
+    if (!mvdVal || !avVal || !bsdVal) { alert('Fill in all three tier thresholds.'); return; }
+    if (!(mvdVal < avVal && avVal < bsdVal)) { alert('Thresholds must increase: MVD < AV < BSD.'); return; }
+
+    const goals = S.goals();
+    const isNew = !_gwGoalId;
+    const existing = !isNew ? goals.find(g => String(g.id) === String(_gwGoalId)) : null;
+
+    const goal = {
+      ...(existing || {}),
+      id:          isNew ? Date.now() : _gwGoalId,
+      name, color: _gwColor,
+      trackerType: _gwTracker,
+      kind:        'normal',
+      mvdVal, avVal, bsdVal,
+      mvdClips:    _gwClips.mvd,
+      avClips:     _gwClips.av,
+      bsdClips:    _gwClips.bsd,
+      patoStep:    parseFloat(document.getElementById('gw-pato-step')?.value) || 0.5,
+      patoWallet:  existing?.patoWallet  || 0,
+      dailySecs:   existing?.dailySecs   || {},
+      totalSecs:   existing?.totalSecs   || 0,
+    };
+
+    // reward fields
+    [1,2,3,4].forEach(n => {
+      const mode = _gwRewards[n];
+      goal['reward'+n+'Type'] = mode;
+      goal['reward'+n]        = document.getElementById('gw-r'+n)?.value?.trim() || '';
+      goal['reward'+n+'App']  = document.getElementById('gw-r'+n+'-app')?.value  || ANDROID_APPS[0];
+      goal['reward'+n+'Dur']  = parseInt(document.getElementById('gw-r'+n+'-dur')?.value) || 30;
+    });
+
+    if (isNew) {
+      goals.push(goal);
+    } else {
+      const idx = goals.findIndex(g => String(g.id) === String(_gwGoalId));
+      if (idx !== -1) goals[idx] = goal;
+    }
+
+    S.saveGoals(goals);
+    _fbPushFullState();
+    document.getElementById('goal-wizard-overlay').classList.remove('open');
+    renderGoals();
+  }
+
+  // ── SHOP WIZARD ───────────────────────────────────────────────────────
+  const SHOP_CATEGORIES = [
+    { id:'food',       label:'Food'        },
+    { id:'screen',     label:'Screen time' },
+    { id:'tech',       label:'Tech'        },
+    { id:'apparel',    label:'Apparel'     },
+    { id:'experience', label:'Experience'  },
+    { id:'mystery',    label:'Mystery'     },
+    { id:'system',     label:'System'      },
+  ];
+  const SHOP_ICONS = ['coffee','film','gamepad','footwear','map','gift','key','shard','gem'];
+  let _swCategory = 'food';
+  let _swIcon     = 'coffee';
+
+  function openShopWizard() {
+    _swCategory = 'food';
+    _swIcon     = 'coffee';
+    renderShopWizardBody();
+    document.getElementById('shop-wizard-overlay').classList.add('open');
+  }
+
+  function closeShopWizard(e) {
+    if (e && e.target !== document.getElementById('shop-wizard-overlay')) return;
+    document.getElementById('shop-wizard-overlay').classList.remove('open');
+  }
+
+  function swSetCategory(id) {
+    _swCategory = id;
+    document.querySelectorAll('.sw-cat-btn').forEach(b => b.classList.toggle('active', b.dataset.c === id));
+  }
+
+  function swSetIcon(icon) {
+    _swIcon = icon;
+    document.querySelectorAll('.sw-icon-btn').forEach(b => b.classList.toggle('active', b.dataset.i === icon));
+  }
+
+  function renderShopWizardBody() {
+    const catBtns = SHOP_CATEGORIES.map(c =>
+      `<button class="wiz-seg-btn sw-cat-btn${c.id===_swCategory?' active':''}" data-c="${c.id}" onclick="swSetCategory('${c.id}')" style="border-right:0.5px solid var(--border2);">${c.label}</button>`
+    ).join('');
+
+    const iconBtns = SHOP_ICONS.map(i =>
+      `<button class="sw-icon-btn${i===_swIcon?' active':''}" data-i="${i}" onclick="swSetIcon('${i}')" style="width:40px;height:40px;border-radius:10px;background:${i===_swIcon?'var(--bg4)':'var(--bg3)'};border:0.5px solid ${i===_swIcon?'var(--green)':'var(--border2)'};display:flex;align-items:center;justify-content:center;color:${i===_swIcon?'var(--green)':'var(--text3)'};-webkit-tap-highlight-color:transparent;">${catIconSvg(i)}</button>`
+    ).join('');
+
+    document.getElementById('shop-wizard-body').innerHTML = `
+      <div class="wiz-group">
+        <label class="wiz-label">Item Name</label>
+        <input class="wiz-input" id="sw-name" type="text" maxlength="40" placeholder="e.g. Coffee run">
+      </div>
+      <div class="wiz-group">
+        <label class="wiz-label">Category</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;overflow:hidden;">
+          ${catBtns}
+        </div>
+      </div>
+      <div class="wiz-group">
+        <label class="wiz-label">Icon</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">${iconBtns}</div>
+      </div>
+      <div class="wiz-group">
+        <label class="wiz-label">Pato Price</label>
+        <input class="wiz-input" id="sw-price" type="number" min="1" placeholder="e.g. 25" style="max-width:120px;">
+      </div>
+      <div class="wiz-group">
+        <label class="wiz-label">Type</label>
+        <div class="wiz-seg">
+          <button class="wiz-seg-btn active" id="sw-type-rw" onclick="document.getElementById('sw-type-rw').classList.add('active');document.getElementById('sw-type-mech').classList.remove('active');">Real World</button>
+          <button class="wiz-seg-btn" id="sw-type-mech" onclick="document.getElementById('sw-type-mech').classList.add('active');document.getElementById('sw-type-rw').classList.remove('active');">Mechanics</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function saveShopWizard() {
+    const name  = (document.getElementById('sw-name')?.value || '').trim();
+    const price = parseInt(document.getElementById('sw-price')?.value) || 0;
+    if (!name) { document.getElementById('sw-name')?.focus(); return; }
+    if (!price) { document.getElementById('sw-price')?.focus(); return; }
+
+    const kind = document.getElementById('sw-type-mech')?.classList.contains('active') ? 'mechanics' : 'real-world';
+    const item = {
+      id:         Date.now(),
+      name,
+      categoryId: _swCategory,
+      icon:       _swIcon,
+      price,
+      kind,
+      createdAt:  Date.now(),
+    };
+
+    const catalog = S.catalog();
+    catalog.push(item);
+    S.saveCatalog(catalog);
+    _fbPushFullState();
+    document.getElementById('shop-wizard-overlay').classList.remove('open');
+    renderShop();
+  }
+
+  // ── SESSION NOTIFICATION ──────────────────────────────────────────────
+  let _notifInterval = null;
+
+  async function requestNotifPermission() {
+    if (!('Notification' in window)) return false;
+    if (Notification.permission === 'granted') return true;
+    if (Notification.permission === 'denied') return false;
+    const result = await Notification.requestPermission();
+    return result === 'granted';
+  }
+
+  async function showSessionNotification(goalName, focusSecs) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    // close any existing session notification
+    closeSessionNotification();
+    const h = Math.floor(focusSecs / 3600);
+    const m = Math.floor((focusSecs % 3600) / 60);
+    const s = focusSecs % 60;
+    const timeStr = (h ? String(h).padStart(2,'0') + ':' : '') +
+                    String(m).padStart(2,'0') + ':' +
+                    String(s).padStart(2,'0');
+    new Notification('Flomodoro · ' + goalName, {
+      body:              '⏱ ' + timeStr + ' — tap to return',
+      icon:              'icon-192.png',
+      tag:               'flomodoro-session',
+      requireInteraction: true,
+      silent:            true,
+    });
+  }
+
+  function closeSessionNotification() {
+    // closing by tag isn't directly possible via JS — re-issuing with same tag replaces it
+    // on punch out we let it expire naturally or user dismisses
+    if (_notifInterval) { clearInterval(_notifInterval); _notifInterval = null; }
+  }
+
+  async function startSessionNotification(goalName) {
+    const granted = await requestNotifPermission();
+    if (!granted) return;
+    // show immediately then refresh every 60s
+    const tick = () => {
+      const act = S.active(); if (!act) { closeSessionNotification(); return; }
+      showSessionNotification(goalName, S.focusElapsedSecs(act));
+    };
+    tick();
+    _notifInterval = setInterval(tick, 60000);
+  }
+
+  function stopSessionNotification() {
+    closeSessionNotification();
+    // issue a silent "session ended" notification that auto-dismisses
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const n = new Notification('Flomodoro · session ended', {
+        body:   'Good work — punch out complete.',
+        icon:   'icon-192.png',
+        tag:    'flomodoro-session',
+        silent: true,
+      });
+      setTimeout(() => n.close(), 4000);
+    }
+  }
+
   // ── WAKE LOCK ─────────────────────────────────────────────────────────
   let _wakeLock = null;
 
@@ -2319,7 +3116,7 @@
     const gid = _sheetGoalId;
     closeSheet();
     if (action === 'info')    { setTimeout(() => alert('Goal info — coming soon'), 300); }
-    if (action === 'edit')    { setTimeout(() => alert('Goal edit — coming soon'), 300); }
+    if (action === 'edit')    { setTimeout(() => openGoalWizard(gid), 300); }
     if (action === 'reorder') { setTimeout(() => enterReorderMode(), 300); }
     if (action === 'delete') {
       setTimeout(() => {
@@ -2459,6 +3256,7 @@
     updateSessionUI();
     document.getElementById('session-screen').classList.add('open');
     requestWakeLock();
+    startSessionNotification(goalName);
     clearInterval(_sessionInterval);
     _sessionInterval = setInterval(tickSession, 1000);
   }
@@ -2596,6 +3394,7 @@
 
     S.saveActive(null);
     releaseWakeLock();
+    stopSessionNotification();
     _fbPushSession();
     _fbPushFullState();
     document.getElementById('session-screen').classList.remove('open');
@@ -2884,11 +3683,12 @@
     document.querySelectorAll('.subnav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('cp-' + sub).classList.add('active');
     event.currentTarget.classList.add('active');
-    if (sub === 'wheel')   renderWheelPane();
-    if (sub === 'jar')     renderJarPane();
-    if (sub === 'weekly')  renderWeeklyPane();
-    if (sub === 'tickets') renderTicketsPane();
-    if (sub === 'log')     renderLogPane();
+    if (sub === 'wheel')    renderWheelPane();
+    if (sub === 'jar')      renderJarPane();
+    if (sub === 'weekly')   renderWeeklyPane();
+    if (sub === 'tickets')  renderTicketsPane();
+    if (sub === 'log')      renderLogPane();
+    if (sub === 'blockers') renderBlockerPane();
   };
 
   // ── SHOP ──────────────────────────────────────────────────────────────
@@ -2935,11 +3735,12 @@
   }
 
   function confirmBuy(itemId) {
-    const item = S.catalog().find(i => i.id === itemId);
-    const bal  = S.totalPato();
-    if (!item || bal < item.price) return;
-    S.spendPato(item.price);
-    S.addRedemption({ itemId: item.id, itemName: item.name, price: item.price });
+    const item  = S.catalog().find(i => i.id === itemId);
+    const bal   = S.totalPato();
+    const price = currentItemPrice(item);
+    if (!item || bal < price) return;
+    S.spendPato(price);
+    S.addRedemption({ itemId: item.id, itemName: item.name, price });
     _fbPushFullState();
     _buyOpenId = null;
     renderShop();
@@ -2966,23 +3767,66 @@
           <div class="cat-icon" style="color:${color};">${catIconSvg(it.icon)}</div>
           <div class="cat-name">${it.name}</div>
           <div class="cat-cap">${cat ? cat.label : ''}</div>
-          <div class="cat-price">${it.price} pato</div>
+          <div class="cat-price">${currentItemPrice(it)} pato${it.pricingMode==='usd-anchored'?' today':''}</div>
         </div>`;
     }).join('') + `
-      <div class="cat-card add" onclick="alert('Add item wizard — coming soon')">
+      <div class="cat-card add" onclick="openShopWizard()">
         <div class="cat-icon">${catIconSvg('plus')}</div>
         <div class="cat-cap">add item</div>
       </div>`;
 
     const _patoBalance = S.totalPato();
+    const rate = todaysPatoRate();
     let buyBody = '';
     if (_buyOpenId) {
       const item = _catalog.find(i => i.id === _buyOpenId);
       if (item) {
-        buyBody = _patoBalance < item.price
-          ? `<div class="cat-buy-msg">${item.name} needs ${item.price} pato — you have ${_patoBalance} pato</div>`
-          : `<div class="cat-buy-item-lbl">${item.name} · ${item.price} pato from your balance of ${_patoBalance}</div>
-             <button class="cat-buy-confirm" onclick="confirmBuy(${item.id})">redeem for ${item.price} pato</button>`;
+        const price = currentItemPrice(item);
+        const priceLabel = item.pricingMode === 'usd-anchored'
+          ? `${price} pato today ($${item.usdPrice} @ $${rate.toFixed(3)}/pato)`
+          : `${price} pato`;
+
+        if (_patoBalance < price) {
+          buyBody = `<div class="cat-buy-msg">${item.name} costs ${priceLabel} — you have ${_patoBalance} pato</div>`;
+        } else if (item.kind === 'unlock-timed') {
+          // Key Glass — tier picker
+          const goals = S.goals().filter(g => g.kind !== 'blocker');
+          const goalOpts = goals.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+          const tierOpts = KEY_GLASS_TIERS.map((t,i) => `<option value="${i}">${t.minutes} min · ${t.price} pato</option>`).join('');
+          buyBody = `
+            <div class="cat-buy-item-lbl">Select goal and session duration</div>
+            <select class="wiz-select" id="kg-goal" style="margin-bottom:8px;">${goalOpts}</select>
+            <select class="wiz-select" id="kg-tier" style="margin-bottom:12px;">${tierOpts}</select>
+            <button class="cat-buy-confirm" onclick="applyKeyGlass(document.getElementById('kg-goal').value, parseInt(document.getElementById('kg-tier').value));_buyOpenId=null;renderShop();">Use Key Glass</button>`;
+        } else if (item.kind === 'unlock-tracking') {
+          // Key Shard — goal picker
+          const goals = S.goals().filter(g => g.kind !== 'blocker' && isGoalLocked(g.id));
+          if (!goals.length) {
+            buyBody = `<div class="cat-buy-msg">No goals are currently locked — nothing to unlock.</div>`;
+          } else {
+            const goalOpts = goals.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+            buyBody = `
+              <div class="cat-buy-item-lbl">Select a locked goal to bypass (tracking only, no clips/jar)</div>
+              <select class="wiz-select" id="ks-goal" style="margin-bottom:12px;">${goalOpts}</select>
+              <button class="cat-buy-confirm" onclick="applyKeyShard(document.getElementById('ks-goal').value);_buyOpenId=null;renderShop();">Use Key Shard · 20 pato</button>`;
+          }
+        } else if (item.kind === 'unlock-blocker') {
+          // Keystone — blocker picker
+          const blockers = S.goals().filter(g => g.kind === 'blocker' && isBlockerActive(g));
+          if (!blockers.length) {
+            buyBody = `<div class="cat-buy-msg">No habit blockers are currently active.</div>`;
+          } else {
+            const blockerOpts = blockers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+            buyBody = `
+              <div class="cat-buy-item-lbl">Select a habit blocker to fully clear</div>
+              <select class="wiz-select" id="kst-blocker" style="margin-bottom:12px;">${blockerOpts}</select>
+              <button class="cat-buy-confirm" onclick="applyKeystone(document.getElementById('kst-blocker').value);_buyOpenId=null;renderShop();">Use Keystone · 50 pato</button>`;
+          }
+        } else {
+          buyBody = `
+            <div class="cat-buy-item-lbl">${item.name} · ${priceLabel} from your balance of ${_patoBalance}</div>
+            <button class="cat-buy-confirm" onclick="confirmBuy(${item.id})">redeem for ${price} pato</button>`;
+        }
       }
     }
 
@@ -3253,6 +4097,222 @@
       </div>
     `;
   }
+
+  // ── PATO REAL WORLD PRICING ───────────────────────────────────────────
+  function hashDateStr(s) {
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  function mulberry32(seed) {
+    return function() {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function patoMarketStep(prevRate, dateStr) {
+    const BASELINE = 0.75, REVERT = 0.15, NOISE_PCT = 0.25;
+    const rng = mulberry32(hashDateStr(dateStr));
+    const noise = (rng() - 0.5) * 2;
+    const shockRoll = rng(), shockDir = rng(), shockMag = rng();
+    let rate = prevRate + REVERT * (BASELINE - prevRate) + noise * NOISE_PCT * prevRate;
+    if (shockRoll < 0.10) rate *= (shockDir < 0.5) ? (0.4 + shockMag * 0.2) : (1.6 + shockMag * 0.6);
+    return Math.max(0.15, Math.min(2.50, Math.round(rate * 1000) / 1000));
+  }
+  function patoExchangeRate(dateStr) {
+    const target = new Date(dateStr + 'T00:00:00');
+    let rate = 0.75;
+    for (let i = 44; i >= 0; i--) {
+      const d = new Date(target);
+      d.setDate(d.getDate() - i);
+      const ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      rate = patoMarketStep(rate, ds);
+    }
+    return rate;
+  }
+  function todaysPatoRate() { return patoExchangeRate(S.today()); }
+  function currentPatoPriceForUsd(usdPrice) {
+    return Math.round((usdPrice / todaysPatoRate()) * 10) / 10;
+  }
+  function currentItemPrice(item) {
+    return item.pricingMode === 'usd-anchored' ? currentPatoPriceForUsd(item.usdPrice) : (item.price || 0);
+  }
+
+  // ── KEY GLASS / KEY SHARD MECHANICS ───────────────────────────────────
+  const KEY_GLASS_TIERS = [
+    { minutes: 30, price: 10 },
+    { minutes: 60, price: 20 },
+    { minutes: 90, price: 30 },
+  ];
+
+  function mostRecentThreshold(hhmm) {
+    const [h, m] = (hhmm || '00:00').split(':').map(n => parseInt(n) || 0);
+    const now = new Date();
+    const t = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+    if (t.getTime() > now.getTime()) t.setDate(t.getDate() - 1);
+    return t.getTime();
+  }
+
+  function isKeyGlassActive(gid) {
+    const g = S.goalById(gid);
+    if (!g || !g.keyGlassSession) return false;
+    return Date.now() < g.keyGlassSession.expiresAt;
+  }
+
+  function isKeyShardBypassActive(gid) {
+    const g = S.goalById(gid);
+    if (!g || !g.keyShardBypass) return false;
+    const goals  = S.goals();
+    const blocker = goals.find(b => String(b.id) === String(g.keyShardBypass.blockerId));
+    if (!blocker || blocker.kind !== 'blocker') return false;
+    return mostRecentThreshold(blocker.startsBlockingAt) === g.keyShardBypass.thresholdSnapshot;
+  }
+
+  function isBlockerActive(b) {
+    const threshold = mostRecentThreshold(b.startsBlockingAt);
+    return !b.lastCompletedAt || b.lastCompletedAt < threshold;
+  }
+
+  function lockingBlockers(gid) {
+    const goals = S.goals();
+    return goals.filter(b => b.kind === 'blocker'
+      && (b.locks || []).map(String).includes(String(gid))
+      && isBlockerActive(b)
+      && !isKeyGlassActive(gid) && !isKeyShardBypassActive(gid));
+  }
+
+  function isGoalLocked(gid) {
+    return lockingBlockers(gid).length > 0;
+  }
+
+  // apply Key Glass — starts a timed session bypass on a locked goal
+  function applyKeyGlass(goalId, tierIdx) {
+    const goals  = S.goals();
+    const g      = goals.find(go => String(go.id) === String(goalId));
+    const tier   = KEY_GLASS_TIERS[tierIdx] || KEY_GLASS_TIERS[0];
+    const blockers = lockingBlockers(goalId);
+    if (!g || !blockers.length) { alert(g ? g.name + ' is not currently locked.' : 'Goal not found.'); return; }
+    if (S.totalPato() < tier.price) { alert('Not enough pato. Need ' + tier.price + ' pato.'); return; }
+    g.keyGlassSession = {
+      blockerId:   blockers[0].id,
+      expiresAt:   Date.now() + tier.minutes * 60000,
+      durationMin: tier.minutes,
+    };
+    S.spendPato(tier.price);
+    S.saveGoals(goals);
+    _fbPushFullState();
+    renderGoals();
+    renderShop();
+    alert('Key Glass active — ' + g.name + ' unlocked for ' + tier.minutes + ' min.');
+  }
+
+  // apply Key Shard — bypasses current lock cycle for one goal (tracking only)
+  function applyKeyShard(goalId) {
+    const goals    = S.goals();
+    const g        = goals.find(go => String(go.id) === String(goalId));
+    const blockers = lockingBlockers(goalId);
+    if (!g || !blockers.length) { alert(g ? g.name + ' is not currently locked.' : 'Goal not found.'); return; }
+    if (S.totalPato() < 20) { alert('Not enough pato. Need 20 pato.'); return; }
+    g.keyShardBypass = {
+      blockerId:         blockers[0].id,
+      thresholdSnapshot: mostRecentThreshold(blockers[0].startsBlockingAt),
+    };
+    S.spendPato(20);
+    S.saveGoals(goals);
+    _fbPushFullState();
+    renderGoals();
+    renderShop();
+    alert('Key Shard used — ' + g.name + ' tracking unlocked until next cycle.');
+  }
+
+  // apply Keystone — completes a blocker entirely
+  function applyKeystone(blockerId) {
+    const goals   = S.goals();
+    const blocker = goals.find(b => String(b.id) === String(blockerId) && b.kind === 'blocker');
+    if (!blocker) { alert('Blocker not found.'); return; }
+    if (S.totalPato() < 50) { alert('Not enough pato. Need 50 pato.'); return; }
+    blocker.lastCompletedAt = Date.now();
+    (blocker.subtasks || []).forEach(s => s.done = false);
+    S.spendPato(50);
+    S.saveGoals(goals);
+    _fbPushFullState();
+    renderGoals();
+    renderBlockerPane();
+    alert('Keystone used — ' + blocker.name + ' cleared.');
+  }
+
+  // ── HABIT BLOCKER PANE ────────────────────────────────────────────────
+  function renderBlockerPane() {
+    const pane = document.getElementById('blocker-pane-inner');
+    if (!pane) return;
+    const blockers = S.goals().filter(g => g.kind === 'blocker');
+    if (!blockers.length) {
+      pane.innerHTML = '<div class="hb-empty">no habit blockers — create them on PC</div>';
+      return;
+    }
+    pane.innerHTML = blockers.map(b => {
+      const active    = isBlockerActive(b);
+      const subtasks  = b.subtasks || [];
+      const doneCount = subtasks.filter(s => s.done).length;
+      const pct       = subtasks.length ? (doneCount / subtasks.length) * 100 : 0;
+      const locks     = (b.locks || []).map(lid => S.goalById(lid)).filter(Boolean);
+      const statusLabel = active ? 'BLOCKING' : 'CLEAR';
+      const statusColor = active ? 'var(--red)' : 'var(--green)';
+      const subtasksHtml = subtasks.map((s, i) => `
+        <div class="hb-subtask${s.done?' done':''}" onclick="toggleBlockerSubtask('${b.id}', ${i})">
+          <div class="hb-check">${s.done?'✓':''}</div>
+          <span>${s.text || s.name || 'Task '+(i+1)}</span>
+        </div>`).join('');
+      const locksHtml = locks.map(g => `
+        <span class="hb-lock-chip" style="color:${active?'var(--red)':'var(--green)'};background:${active?'rgba(196,106,106,0.1)':'var(--green-bg)'};border:0.5px solid ${active?'rgba(196,106,106,0.3)':'var(--green-border)'};">
+          ${g.name}
+        </span>`).join('');
+      return `
+        <div class="hb-card${active?'':' cleared'}">
+          <div class="hb-header">
+            <div class="hb-dot" style="background:${b.color||'var(--amber)'};"></div>
+            <span class="hb-name">${b.name}</span>
+            <span class="hb-status-pill" style="color:${statusColor};background:${active?'rgba(196,106,106,0.1)':'var(--green-bg)'};border:0.5px solid ${active?'rgba(196,106,106,0.3)':'var(--green-border)'};">${statusLabel}</span>
+          </div>
+          <div class="hb-bar"><div class="hb-bar-fill" style="width:${pct}%;background:${active?'var(--amber)':'var(--green)'};"></div></div>
+          ${subtasksHtml ? `<div class="hb-subtasks">${subtasksHtml}</div>` : ''}
+          ${locks.length ? `<div class="hb-footer">locks<div class="hb-locks">${locksHtml}</div></div>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  function toggleBlockerSubtask(blockerId, idx) {
+    const goals   = S.goals();
+    const blocker = goals.find(g => String(g.id) === String(blockerId));
+    if (!blocker || !blocker.subtasks) return;
+    blocker.subtasks[idx].done = !blocker.subtasks[idx].done;
+    // check if all done — auto-complete
+    if (blocker.subtasks.every(s => s.done)) {
+      blocker.lastCompletedAt = Date.now();
+      blocker.subtasks.forEach(s => s.done = false);
+    }
+    S.saveGoals(goals);
+    _fbPushFullState();
+    renderBlockerPane();
+    renderGoals(); // re-render goals in case lock state changed
+  }
+
+  // ── OFFLINE FALLBACK ──────────────────────────────────────────────────
+  function setOfflineBanner(visible) {
+    const el = document.getElementById('offline-banner');
+    if (el) el.classList.toggle('visible', visible);
+  }
+
+  window.addEventListener('online',  () => setOfflineBanner(false));
+  window.addEventListener('offline', () => setOfflineBanner(true));
+  if (!navigator.onLine) setOfflineBanner(true);
+
+  // also show banner if Firebase hasn't responded after 5s
+  setTimeout(() => {
+    if (!_initDone) setOfflineBanner(true);
+  }, 5000);
 
   // ── FORMAT HELPERS ────────────────────────────────────────────────────
   function fmtHMS(secs) {
