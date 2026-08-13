@@ -228,6 +228,10 @@
       background: var(--bg3);
       box-shadow: 0 0 0 0.5px #4a8c5c inset;
     }
+    .goalcard.selected {
+      border-color: var(--green-border);
+      background: var(--green-bg);
+    }
     .goalcard.locked { opacity: 0.42; pointer-events: none; }
 
     .gc-top {
@@ -566,124 +570,198 @@
       opacity: 0.4;
     }
 
-    /* ── INLINE SESSION ZONE ───────────────────────────────────────────── */
-    #session-zone {
-      display: none;
-      flex-direction: column;
-      padding: 16px 16px 0;
+    /* ── CLOCK WIDGET ───────────────────────────────────────────────────── */
+    #clock-widget {
+      padding: 20px 16px 16px;
       border-bottom: 0.5px solid var(--border2);
-      margin-bottom: 4px;
       flex-shrink: 0;
     }
-    #session-zone.active { display: flex; }
 
-    .sz-goal-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .sz-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .sz-goal-name {
-      flex: 1;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text2);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .sz-phase {
+    .cw-label {
       font-family: var(--mono);
       font-size: 9px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--text4);
-      flex-shrink: 0;
+      margin-bottom: 6px;
     }
 
-    .sz-timer {
+    .cw-display {
       font-family: var(--mono);
-      font-size: clamp(36px, 12vw, 56px);
+      font-size: clamp(40px, 14vw, 64px);
       font-weight: 300;
       letter-spacing: -0.02em;
-      color: var(--green);
       line-height: 1;
-      margin-bottom: 10px;
-      transition: color 0.4s;
+      color: var(--text2);
+      margin-bottom: 4px;
+      transition: color 0.5s;
     }
-    .sz-timer.on-break { color: var(--amber); }
+    .cw-display.clocked-in { color: var(--green); animation: cwPulse 2s infinite; }
+    .cw-display.on-break   { color: var(--amber); animation: cwPulse 2s infinite; }
+    @keyframes cwPulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
 
-    .sz-bar-wrap { margin-bottom: 6px; }
-    .sz-bar {
-      position: relative;
-      height: 4px;
-      background: var(--bg4);
-      border-radius: 2px;
-      overflow: visible;
+    .cw-meta {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text4);
+      margin-bottom: 14px;
+      min-height: 16px;
     }
-    .sz-bar-fill {
+
+    /* tier track */
+    .cw-tiertrack-wrap { margin-bottom: 14px; }
+    .cw-tiertrack {
+      position: relative;
+      height: 10px;
+      background: var(--bg4);
+      border-radius: 6px;
+      overflow: visible;
+      margin-bottom: 4px;
+    }
+    .cw-tiertrack-fill {
       position: absolute;
       left: 0; top: 0; bottom: 0;
-      border-radius: 2px;
+      border-radius: 6px;
       transition: width 1s linear;
+      background: var(--green);
     }
-    .sz-bar-tick {
+    .cw-tiertrack-tick {
       position: absolute;
-      top: -3px;
-      width: 1.5px; height: 10px;
+      top: -2px;
+      width: 2px; height: 14px;
       background: var(--border);
       border-radius: 1px;
     }
-    .sz-bar-scale {
-      display: flex;
-      justify-content: space-between;
+    .cw-tiertrack-tick::after {
+      content: attr(data-l);
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
       font-family: var(--mono);
       font-size: 8px;
       color: var(--text4);
-      letter-spacing: 0.06em;
-      margin-top: 4px;
-      margin-bottom: 8px;
+      white-space: nowrap;
     }
-
-    .sz-break-info {
+    .cw-tier-hint {
       font-family: var(--mono);
       font-size: 10px;
+      color: var(--text3);
+      margin-top: 18px;
+    }
+
+    /* break info */
+    .cw-break-meta {
+      font-family: var(--mono);
+      font-size: 11px;
       color: var(--amber);
-      margin-bottom: 6px;
-      min-height: 14px;
+      padding: 8px 10px;
+      background: var(--amber-bg);
+      border: 0.5px solid var(--amber-border);
+      border-radius: 8px;
+      margin-bottom: 10px;
     }
-    .sz-break-warning {
+    .cw-break-warning {
       font-family: var(--mono);
-      font-size: 10px;
+      font-size: 11px;
       color: var(--red);
-      margin-bottom: 6px;
-      animation: pulse 1s infinite;
-      min-height: 14px;
+      padding: 8px 10px;
+      background: rgba(196,106,106,0.1);
+      border: 0.5px solid rgba(196,106,106,0.3);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      animation: cwPulse 1s infinite;
     }
 
-    .sz-btns {
+    /* swipe-to-punch slider */
+    .cw-slider-wrap {
+      margin-bottom: 4px;
+    }
+    .cw-slider {
+      position: relative;
+      height: 52px;
+      background: var(--bg3);
+      border: 0.5px solid var(--green-border);
+      border-radius: 14px;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+    .cw-slider-track {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cw-slider-hint {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--green);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .cw-slider-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      background: var(--green-bg);
+      border-radius: 14px;
+      transition: none;
+      pointer-events: none;
+    }
+    .cw-slider-thumb {
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      bottom: 4px;
+      width: 44px;
+      background: var(--green);
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      touch-action: none;
+      will-change: transform;
+      transition: transform 0.15s;
+    }
+    .cw-slider-thumb svg {
+      width: 18px; height: 18px;
+      stroke: #000;
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.8;
+    }
+    .cw-slider-thumb.complete {
+      transform: translateX(calc(100vw - 52px)) !important;
+      transition: transform 0.2s ease;
+    }
+
+    /* action buttons when punched in */
+    .cw-btns {
       display: flex;
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 4px;
     }
-    .sz-btn {
+    .cw-btn {
       flex: 1;
-      height: 38px;
+      height: 40px;
       border-radius: 10px;
       font-family: var(--mono);
       font-size: 10px;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.07em;
       font-weight: 600;
       transition: opacity 0.15s;
       -webkit-tap-highlight-color: transparent;
     }
-    .sz-btn:active { opacity: 0.7; }
-    .sz-btn-out   { color: var(--red);   background: rgba(196,106,106,0.12); border: 0.5px solid rgba(196,106,106,0.3); }
-    .sz-btn-break { color: var(--amber); background: var(--amber-bg);        border: 0.5px solid var(--amber-border); }
-    .sz-btn-focus { color: var(--green); background: var(--green-bg);        border: 0.5px solid var(--green-border); }
-
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .cw-btn:active { opacity: 0.7; }
+    .cw-btn-out   { color: var(--red);   background: rgba(196,106,106,0.12); border: 0.5px solid rgba(196,106,106,0.3); }
+    .cw-btn-break { color: var(--amber); background: var(--amber-bg);        border: 0.5px solid var(--amber-border); }
+    .cw-btn-focus { color: var(--green); background: var(--green-bg);        border: 0.5px solid var(--green-border); }
 
     /* ── BOTTOM SHEET ──────────────────────────────────────────────────── */
     /* ── BOTTOM SHEET ──────────────────────────────────────────────────── */
@@ -1182,32 +1260,6 @@
     }
     #offline-banner.visible { display: flex; }
 
-    /* ── PULL TO REFRESH ───────────────────────────────────────────────── */
-    .ptr-indicator {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      height: 0;
-      overflow: hidden;
-      transition: height 0.2s;
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text4);
-      letter-spacing: 0.08em;
-      flex-shrink: 0;
-    }
-    .ptr-indicator.visible { height: 44px; }
-    .ptr-indicator.refreshing { color: var(--green); }
-    .ptr-spinner {
-      width: 14px; height: 14px;
-      border: 2px solid var(--border);
-      border-top-color: var(--green);
-      border-radius: 50%;
-      display: none;
-    }
-    .ptr-indicator.refreshing .ptr-spinner { display: block; animation: ptr-spin 0.7s linear infinite; }
-    @keyframes ptr-spin { to { transform: rotate(360deg); } }
 
     /* ── LOCKED SCREEN ─────────────────────────────────────────────────── */
     #locked-screen {
@@ -1413,37 +1465,50 @@
         <button class="subnav-btn" onclick="switchClock('blockers')">Blockers</button>
       </div>
 
-      <!-- pull to refresh indicator -->
-      <div class="ptr-indicator" id="ptr-indicator">
-        <div class="ptr-spinner"></div>
         <span id="ptr-label">↓ pull to refresh</span>
       </div>
 
       <!-- goals sub-panel (default) -->
       <div class="clock-panel active" id="cp-goals">
 
-        <!-- inline session zone — shown when punched in -->
-        <div id="session-zone">
-          <div class="sz-goal-row">
-            <div class="sz-dot" id="sz-dot"></div>
-            <span class="sz-goal-name" id="sz-goal-name"></span>
-            <span class="sz-phase" id="sz-phase">focus</span>
-          </div>
-          <div class="sz-timer" id="sz-timer">00:00:00</div>
-          <div class="sz-bar-wrap">
-            <div class="sz-bar">
-              <div class="sz-bar-fill" id="sz-bar-fill"></div>
-              <span class="sz-bar-tick" id="sz-tick-mvd" style="left:33%;"></span>
-              <span class="sz-bar-tick" id="sz-tick-av"  style="left:66%;"></span>
+        <!-- clock widget -->
+        <div id="clock-widget">
+          <div class="cw-label">time clock</div>
+          <div class="cw-display" id="cw-display">00:00:00</div>
+          <div class="cw-meta" id="cw-meta">select a goal below</div>
+
+          <!-- tier track — hidden until punched in -->
+          <div class="cw-tiertrack-wrap" id="cw-tiertrack-wrap" style="display:none;">
+            <div class="cw-tiertrack">
+              <div class="cw-tiertrack-fill" id="cw-tiertrack-fill"></div>
+              <span class="cw-tiertrack-tick" id="cw-tt-mvd"></span>
+              <span class="cw-tiertrack-tick" id="cw-tt-av"></span>
+              <span class="cw-tiertrack-tick" id="cw-tt-bsd"></span>
             </div>
-            <div class="sz-bar-scale"><span>MVD</span><span>AV</span><span>BSD</span></div>
+            <div class="cw-tier-hint" id="cw-tier-hint"></div>
           </div>
-          <div class="sz-break-info"  id="sz-break-info"></div>
-          <div class="sz-break-warning" id="sz-break-warning"></div>
-          <div class="sz-btns">
-            <button class="sz-btn sz-btn-focus" id="sz-focus-btn" onclick="onFocusBtn()" style="display:none;">back to focus</button>
-            <button class="sz-btn sz-btn-break" id="sz-break-btn" onclick="onBreakBtn()">take break</button>
-            <button class="sz-btn sz-btn-out"   onclick="onPunchOut()">punch out</button>
+
+          <!-- break info -->
+          <div class="cw-break-meta"    id="cw-break-meta"    style="display:none;"></div>
+          <div class="cw-break-warning" id="cw-break-warning" style="display:none;"></div>
+
+          <!-- swipe-to-punch slider — shown when not punched in -->
+          <div class="cw-slider-wrap" id="cw-slider-wrap">
+            <div class="cw-slider" id="cw-slider">
+              <div class="cw-slider-track">
+                <span class="cw-slider-hint">swipe to punch in →</span>
+              </div>
+              <div class="cw-slider-thumb" id="cw-slider-thumb">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- action buttons — shown when punched in -->
+          <div class="cw-btns" id="cw-btns" style="display:none;">
+            <button class="cw-btn cw-btn-focus" id="cw-focus-btn" onclick="onFocusBtn()" style="display:none;">back to focus</button>
+            <button class="cw-btn cw-btn-break" id="cw-break-btn" onclick="onBreakBtn()">take break</button>
+            <button class="cw-btn cw-btn-out"   onclick="onPunchOut()">punch out</button>
           </div>
         </div>
 
@@ -1984,6 +2049,8 @@
 
   function goLive() {
     renderGoals();
+    initSlider();
+    updateSessionUI();
     const act = S.active();
     if (act) {
       const g = S.goalById(act.goalId);
@@ -2073,15 +2140,18 @@
 
   function onGoalTap(goalId) {
     const act = S.active();
-    if (act) return; // already in a session — do nothing
+    if (act) return; // already in session
     const g = S.goalById(goalId);
     if (!g || g.locked) return;
-    // punch in
-    const session = { goalId: g.id, goalName: g.name, goalColor: g.color||'#6aad7e',
-                      punchInAt: Date.now(), breakActive:false, breakStartAt:null, breakUsedSecs:0 };
-    S.saveActive(session);
-    renderGoals();
-    openSession(g.name, g.color||'#6aad7e');
+    // select this goal for the slider
+    _sliderGoalId = goalId;
+    setSliderGoal(goalId);
+    // highlight selected card
+    document.querySelectorAll('.goalcard').forEach(c => c.classList.remove('selected'));
+    const card = document.getElementById('gc-' + goalId);
+    if (card) card.classList.add('selected');
+    // scroll to slider
+    document.getElementById('clock-widget')?.scrollIntoView({ behavior:'smooth', block:'nearest' });
   }
 
   // ══════════════════════════════════════════════════════════════════════
@@ -2769,11 +2839,110 @@
 
 
   let _sessionInterval = null;
+  // ── SWIPE-TO-PUNCH SLIDER ─────────────────────────────────────────────
+  let _sliderGoalId  = null; // goal selected for punch-in
+  let _sliderDragging = false;
+  let _sliderStartX   = 0;
+  let _sliderCurX     = 0;
+
+  function initSlider() {
+    const thumb  = document.getElementById('cw-slider-thumb');
+    const slider = document.getElementById('cw-slider');
+    if (!thumb || !slider) return;
+
+    function getMax() { return slider.offsetWidth - thumb.offsetWidth - 8; }
+
+    function setThumbX(x) {
+      x = Math.max(0, Math.min(getMax(), x));
+      thumb.style.transform = `translateX(${x}px)`;
+      // fill behind thumb
+      let fill = slider.querySelector('.cw-slider-fill');
+      if (!fill) { fill = document.createElement('div'); fill.className = 'cw-slider-fill'; slider.insertBefore(fill, thumb); }
+      fill.style.width = (x + thumb.offsetWidth + 4) + 'px';
+    }
+
+    function onStart(e) {
+      if (!_sliderGoalId) return; // no goal selected
+      _sliderDragging = true;
+      _sliderStartX   = (e.touches ? e.touches[0].clientX : e.clientX) - (parseFloat(thumb.style.transform?.replace('translateX(','')) || 0);
+      thumb.style.transition = 'none';
+    }
+    function onMove(e) {
+      if (!_sliderDragging) return;
+      e.preventDefault();
+      _sliderCurX = (e.touches ? e.touches[0].clientX : e.clientX) - _sliderStartX;
+      setThumbX(_sliderCurX);
+    }
+    function onEnd() {
+      if (!_sliderDragging) return;
+      _sliderDragging = false;
+      const max = getMax();
+      if (_sliderCurX >= max * 0.85) {
+        // punch in!
+        thumb.classList.add('complete');
+        setTimeout(() => {
+          thumb.classList.remove('complete');
+          thumb.style.transform = '';
+          const fill = slider.querySelector('.cw-slider-fill');
+          if (fill) fill.style.width = '';
+          doPunchIn(_sliderGoalId);
+        }, 250);
+      } else {
+        // snap back
+        thumb.style.transition = 'transform 0.3s cubic-bezier(0.32,0.72,0,1)';
+        setThumbX(0);
+        setTimeout(() => { const fill = slider.querySelector('.cw-slider-fill'); if (fill) fill.style.width = ''; }, 300);
+      }
+    }
+
+    thumb.addEventListener('pointerdown', onStart);
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup',   onEnd);
+  }
+
+  function setSliderGoal(goalId) {
+    _sliderGoalId = goalId;
+    // update slider appearance
+    const slider = document.getElementById('cw-slider');
+    const hint   = slider?.querySelector('.cw-slider-hint');
+    if (hint) {
+      if (goalId) {
+        const g = S.goalById(goalId);
+        hint.textContent = g ? 'swipe to punch in — ' + g.name + ' →' : 'swipe to punch in →';
+        hint.style.opacity = '0.8';
+      } else {
+        hint.textContent = 'select a goal below';
+        hint.style.opacity = '0.4';
+      }
+    }
+    if (slider) slider.style.borderColor = goalId ? 'var(--green-border)' : 'var(--border2)';
+  }
+
+  function doPunchIn(goalId) {
+    const g = S.goalById(goalId);
+    if (!g || g.locked) return;
+    const session = {
+      goalId:       g.id,
+      goalName:     g.name,
+      goalColor:    g.color || '#6aad7e',
+      punchInAt:    Date.now(),
+      breakActive:  false,
+      breakStartAt: null,
+      breakUsedSecs:0,
+    };
+    S.saveActive(session);
+    openSession(g.name, g.color || '#6aad7e');
+    renderGoals();
+  }
+
+  // ── CLOCK WIDGET SESSION ──────────────────────────────────────────────
   function openSession(goalName, goalColor) {
     const act = S.active(); if (!act) return;
-    document.getElementById('sz-dot').style.background = goalColor;
-    document.getElementById('sz-goal-name').textContent = goalName;
-    document.getElementById('session-zone').classList.add('active');
+    // switch from slider to buttons
+    const sliderWrap = document.getElementById('cw-slider-wrap');
+    const btnsWrap   = document.getElementById('cw-btns');
+    if (sliderWrap) sliderWrap.style.display = 'none';
+    if (btnsWrap)   btnsWrap.style.display   = 'flex';
     updateSessionUI();
     requestWakeLock();
     startSessionNotification(goalName);
@@ -2781,73 +2950,96 @@
     _sessionInterval = setInterval(tickSession, 1000);
   }
 
-  function closeSession() {
-    // session-zone stays visible while session active — no close action
-    // (no back button needed — inline with goals)
-  }
+  function closeSession() { /* no-op — inline widget */ }
 
   function updateSessionUI() {
     const act = S.active();
-    const zone = document.getElementById('session-zone');
-    if (!act) { if (zone) zone.classList.remove('active'); return; }
+    if (!act) {
+      // not punched in — show slider, hide buttons
+      const sliderWrap = document.getElementById('cw-slider-wrap');
+      const btnsWrap   = document.getElementById('cw-btns');
+      const tierWrap   = document.getElementById('cw-tiertrack-wrap');
+      if (sliderWrap) sliderWrap.style.display = '';
+      if (btnsWrap)   btnsWrap.style.display   = 'none';
+      if (tierWrap)   tierWrap.style.display    = 'none';
+      const disp = document.getElementById('cw-display');
+      if (disp) { disp.textContent = '00:00:00'; disp.className = 'cw-display'; }
+      const meta = document.getElementById('cw-meta');
+      if (meta) meta.textContent = _sliderGoalId ? 'swipe right to punch in' : 'select a goal below';
+      document.getElementById('cw-break-meta')?.style?.setProperty('display','none');
+      document.getElementById('cw-break-warning')?.style?.setProperty('display','none');
+      return;
+    }
 
     const focusSecs = S.focusElapsedSecs(act);
     const onBreak   = act.breakActive;
     const g         = S.goalById(act.goalId);
 
-    // timer
-    const timerEl = document.getElementById('sz-timer');
-    if (timerEl) {
-      timerEl.textContent = fmtHMS(focusSecs);
-      timerEl.className   = 'sz-timer' + (onBreak ? ' on-break' : '');
+    // display
+    const disp = document.getElementById('cw-display');
+    if (disp) {
+      disp.textContent = fmtHMS(focusSecs);
+      disp.className   = 'cw-display ' + (onBreak ? 'on-break' : 'clocked-in');
     }
 
-    // phase
-    const phaseEl = document.getElementById('sz-phase');
-    if (phaseEl) phaseEl.textContent = onBreak ? 'on break' : 'focus';
+    // meta
+    const meta = document.getElementById('cw-meta');
+    if (meta) meta.textContent = (onBreak ? 'on break · ' : 'clocked in · ') + (g ? g.name : '');
 
-    // tier bar
-    const barFill = document.getElementById('sz-bar-fill');
-    if (barFill && g) {
+    // tier track
+    const tierWrap = document.getElementById('cw-tiertrack-wrap');
+    if (tierWrap && g) {
+      tierWrap.style.display = '';
       const todayKey  = S.today();
       const todaySecs = ((g.dailySecs && g.dailySecs[todayKey]) || 0) + focusSecs;
       const hasTiers  = g.mvdVal && g.bsdVal;
       const pct       = hasTiers ? Math.min(100, (todaySecs / g.bsdVal) * 100) : Math.min(100, todaySecs / 3600 * 33);
-      barFill.style.width      = pct + '%';
-      barFill.style.background = g.color || '#6aad7e';
-      const mvdTick = document.getElementById('sz-tick-mvd');
-      const avTick  = document.getElementById('sz-tick-av');
-      if (hasTiers && mvdTick && avTick) {
-        mvdTick.style.left = Math.min(99, (g.mvdVal / g.bsdVal) * 100) + '%';
-        avTick.style.left  = Math.min(99, (g.avVal  / g.bsdVal) * 100) + '%';
+      const fill = document.getElementById('cw-tiertrack-fill');
+      if (fill) { fill.style.width = pct + '%'; fill.style.background = g.color || '#6aad7e'; }
+      const mvdTick = document.getElementById('cw-tt-mvd');
+      const avTick  = document.getElementById('cw-tt-av');
+      const bsdTick = document.getElementById('cw-tt-bsd');
+      if (hasTiers) {
+        if (mvdTick) { mvdTick.style.left = Math.min(99,(g.mvdVal/g.bsdVal)*100)+'%'; mvdTick.setAttribute('data-l','MVD'); }
+        if (avTick)  { avTick.style.left  = Math.min(99,(g.avVal /g.bsdVal)*100)+'%'; avTick.setAttribute('data-l','AV');  }
+        if (bsdTick) { bsdTick.style.left = '99%'; bsdTick.setAttribute('data-l','BSD'); }
+      }
+      // tier hint
+      const hint = document.getElementById('cw-tier-hint');
+      if (hint && hasTiers) {
+        let label = '—';
+        if      (todaySecs >= g.bsdVal) label = 'Best Day';
+        else if (todaySecs >= g.avVal)  label = 'Average Day';
+        else if (todaySecs >= g.mvdVal) label = 'Minimum Viable Day';
+        hint.textContent = label !== '—' ? '✓ ' + label : '';
       }
     }
 
-    // break / focus buttons
-    const focusBtn = document.getElementById('sz-focus-btn');
-    const breakBtn = document.getElementById('sz-break-btn');
+    // break/focus buttons
+    const focusBtn = document.getElementById('cw-focus-btn');
+    const breakBtn = document.getElementById('cw-break-btn');
     if (focusBtn) focusBtn.style.display = onBreak ? '' : 'none';
     if (breakBtn) breakBtn.style.display = onBreak ? 'none' : '';
 
     // break info
-    const infoEl = document.getElementById('sz-break-info');
-    const warnEl = document.getElementById('sz-break-warning');
+    const breakMeta = document.getElementById('cw-break-meta');
+    const breakWarn = document.getElementById('cw-break-warning');
     if (onBreak) {
       const allowedSecs = Math.floor(focusSecs / 4);
       const spentSecs   = Math.floor((Date.now() - act.breakStartAt) / 1000);
       const remaining   = allowedSecs - spentSecs;
       if (remaining >= 0) {
-        if (infoEl) infoEl.textContent = 'break · ' + fmtMS(remaining) + ' remaining';
-        if (warnEl) warnEl.textContent = '';
+        if (breakMeta) { breakMeta.textContent = 'break · ' + fmtMS(remaining) + ' remaining'; breakMeta.style.display = ''; }
+        if (breakWarn) breakWarn.style.display = 'none';
       } else {
-        if (infoEl) infoEl.textContent = '';
+        if (breakMeta) breakMeta.style.display = 'none';
         const countdown = 60 + remaining;
-        if (warnEl) warnEl.textContent = '⚠ break overrun — punching out in ' + Math.max(0, countdown) + 's';
+        if (breakWarn) { breakWarn.textContent = '⚠ break overrun — punching out in ' + Math.max(0,countdown) + 's'; breakWarn.style.display = ''; }
         if (countdown <= 0) onPunchOut();
       }
     } else {
-      if (infoEl) infoEl.textContent = '';
-      if (warnEl) warnEl.textContent = '';
+      if (breakMeta) breakMeta.style.display = 'none';
+      if (breakWarn) breakWarn.style.display = 'none';
     }
   }
 
@@ -2926,7 +3118,15 @@
     S.saveActive(null);
     releaseWakeLock();
     stopSessionNotification();
-    document.getElementById('session-zone').classList.remove('active');
+    // restore slider
+    _sliderGoalId = null;
+    const sliderWrap = document.getElementById('cw-slider-wrap');
+    const btnsWrap   = document.getElementById('cw-btns');
+    if (sliderWrap) sliderWrap.style.display = '';
+    if (btnsWrap)   btnsWrap.style.display   = 'none';
+    document.querySelectorAll('.goalcard.selected').forEach(c => c.classList.remove('selected'));
+    setSliderGoal(null);
+    updateSessionUI();
     renderGoals();
   }
 
@@ -3880,92 +4080,7 @@
     document.getElementById('locked-screen').classList.remove('visible');
   }
 
-  // ── PULL TO REFRESH ───────────────────────────────────────────────────
-  (function() {
-    let _ptrStartY   = 0;
-    let _ptrDelta    = 0;
-    let _ptrActive   = false;
-    let _ptrRefreshing = false;
-    const THRESHOLD  = 72; // px pull needed to trigger refresh
 
-    function ptrIndicator()  { return document.getElementById('ptr-indicator'); }
-    function ptrLabel()      { return document.getElementById('ptr-label'); }
-
-    function ptrShow(delta) {
-      const el = ptrIndicator();
-      if (!el) return;
-      el.classList.add('visible');
-      el.classList.remove('refreshing');
-      ptrLabel().textContent = delta >= THRESHOLD ? '↑ release to refresh' : '↓ pull to refresh';
-    }
-
-    function ptrHide() {
-      const el = ptrIndicator();
-      if (!el) return;
-      el.classList.remove('visible');
-      el.classList.remove('refreshing');
-    }
-
-    async function ptrRefresh() {
-      if (_ptrRefreshing) return;
-      _ptrRefreshing = true;
-      const el = ptrIndicator();
-      if (el) {
-        el.classList.add('visible', 'refreshing');
-        ptrLabel().textContent = 'refreshing…';
-      }
-      await new Promise(r => setTimeout(r, 600));
-      // re-render current visible screens from local state
-      renderGoals();
-      if (document.getElementById('cp-jar')?.classList.contains('active'))      renderJarPane();
-      if (document.getElementById('cp-weekly')?.classList.contains('active'))   renderWeeklyPane();
-      if (document.getElementById('cp-tickets')?.classList.contains('active'))  renderTicketsPane();
-      if (document.getElementById('cp-blockers')?.classList.contains('active')) renderBlockerPane();
-      if (document.getElementById('cp-log')?.classList.contains('active'))      renderLogPane();
-      if (document.getElementById('panel-shop')?.classList.contains('active'))  renderShop();
-      ptrHide();
-      _ptrRefreshing = false;
-    }
-
-    // attach to the clock panel and shop panel
-    function getScrollEl() {
-      // find the active scroll container
-      const activePanel = document.querySelector('.clock-panel.active .scroll-content, #cp-goals');
-      if (activePanel) return activePanel;
-      if (document.getElementById('panel-shop')?.classList.contains('active')) {
-        return document.querySelector('#panel-shop .scroll-content');
-      }
-      return null;
-    }
-
-    document.addEventListener('touchstart', e => {
-      const el = getScrollEl();
-      if (!el) return;
-      if (el.scrollTop > 0) return; // only trigger when at top
-      _ptrStartY  = e.touches[0].clientY;
-      _ptrActive  = true;
-      _ptrDelta   = 0;
-    }, { passive: true });
-
-    document.addEventListener('touchmove', e => {
-      if (!_ptrActive || _ptrRefreshing) return;
-      const el = getScrollEl();
-      if (!el || el.scrollTop > 2) { _ptrActive = false; ptrHide(); return; }
-      _ptrDelta = Math.max(0, e.touches[0].clientY - _ptrStartY);
-      if (_ptrDelta > 10) ptrShow(_ptrDelta);
-    }, { passive: true });
-
-    document.addEventListener('touchend', () => {
-      if (!_ptrActive) return;
-      _ptrActive = false;
-      if (_ptrDelta >= THRESHOLD) {
-        ptrRefresh();
-      } else {
-        ptrHide();
-      }
-      _ptrDelta = 0;
-    });
-  })();
 
   // ── OFFLINE FALLBACK ──────────────────────────────────────────────────
   function setOfflineBanner(visible) {
