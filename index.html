@@ -8,58 +8,24 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Flomodoro">
   <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
   <title>Flomodoro</title>
 
-  <!-- Inline PWA manifest -->
-  <script>
-    const _manifest = {
-      name: "Flomodoro",
-      short_name: "Flomodoro",
-      description: "Focus session tracker and reward system",
-      start_url: "./",
-      display: "standalone",
-      orientation: "portrait",
-      background_color: "#111110",
-      theme_color: "#111110",
-      icons: [
-        {
-          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23111110'/%3E%3Ccircle cx='256' cy='256' r='180' fill='none' stroke='%236aad7e' stroke-width='28'/%3E%3Cline x1='256' y1='100' x2='256' y2='256' stroke='%236aad7e' stroke-width='22' stroke-linecap='round'/%3E%3Cline x1='256' y1='256' x2='340' y2='310' stroke='%236aad7e' stroke-width='22' stroke-linecap='round'/%3E%3C/svg%3E",
-          sizes: "512x512",
-          type: "image/svg+xml",
-          purpose: "any maskable"
-        }
-      ]
-    };
-    const _blob = new Blob([JSON.stringify(_manifest)], { type: 'application/manifest+json' });
-    const _link = document.createElement('link');
-    _link.rel = 'manifest';
-    _link.href = URL.createObjectURL(_blob);
-    document.currentScript.after(_link);
-  </script>
-
-  <!-- Service worker registration for PWA install -->
+  <!-- Service worker registration -->
   <script>
     if ('serviceWorker' in navigator) {
       const swCode = `
         const CACHE = 'flomodoro-v1';
-        self.addEventListener('install', e => {
-          self.skipWaiting();
-        });
-        self.addEventListener('activate', e => {
-          e.waitUntil(clients.claim());
-        });
+        self.addEventListener('install', e => { self.skipWaiting(); });
+        self.addEventListener('activate', e => { e.waitUntil(clients.claim()); });
         self.addEventListener('fetch', e => {
-          // network first, fall back to cache for the main document
           if (e.request.mode === 'navigate') {
-            e.respondWith(
-              fetch(e.request).catch(() => caches.match(e.request))
-            );
+            e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
           }
         });
       `;
       const swBlob = new Blob([swCode], { type: 'application/javascript' });
-      const swUrl  = URL.createObjectURL(swBlob);
-      navigator.serviceWorker.register(swUrl, { scope: './' }).catch(() => {});
+      navigator.serviceWorker.register(URL.createObjectURL(swBlob), { scope: './' }).catch(() => {});
     }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
