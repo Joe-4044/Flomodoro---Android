@@ -566,791 +566,126 @@
       opacity: 0.4;
     }
 
-    /* ── SESSION SCREEN ────────────────────────────────────────────────── */
-    #session-screen {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      display: flex;
+    /* ── INLINE SESSION ZONE ───────────────────────────────────────────── */
+    #session-zone {
+      display: none;
       flex-direction: column;
-      padding-top: var(--sat);
-      padding-bottom: var(--sab);
-      transform: translateY(100%);
-      transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
-      z-index: 100;
-      will-change: transform;
+      padding: 16px 16px 0;
+      border-bottom: 0.5px solid var(--border2);
+      margin-bottom: 4px;
+      flex-shrink: 0;
     }
-    #session-screen.open { transform: translateY(0); }
+    #session-zone.active { display: flex; }
 
-    .session-header {
+    .sz-goal-row {
       display: flex;
       align-items: center;
-      height: var(--header-h);
-      padding: 0 16px;
-      border-bottom: 0.5px solid var(--border2);
-      flex-shrink: 0;
-      gap: 10px;
+      gap: 8px;
+      margin-bottom: 12px;
     }
-    .session-back {
-      width: 36px; height: 36px;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 10px;
-      color: var(--text3);
-      flex-shrink: 0;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.15s;
-    }
-    .session-back:active { background: var(--bg4); }
-    .session-back svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-
-    .session-goal-name {
+    .sz-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sz-goal-name {
       flex: 1;
-      font-family: var(--sans);
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--text);
+      color: var(--text2);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .session-goal-dot {
-      width: 9px; height: 9px;
-      border-radius: 50%;
+    .sz-phase {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text4);
       flex-shrink: 0;
     }
 
-    /* main session body */
-    .session-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px 24px 0;
-      gap: 0;
-    }
-
-    /* phase label */
-    .session-phase {
+    .sz-timer {
       font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text4);
-      margin-bottom: 16px;
-    }
-
-    /* big timer */
-    .session-timer {
-      font-family: var(--mono);
-      font-size: clamp(52px, 18vw, 88px);
+      font-size: clamp(36px, 12vw, 56px);
       font-weight: 300;
-      letter-spacing: -0.03em;
-      line-height: 1;
+      letter-spacing: -0.02em;
       color: var(--green);
-      transition: color 0.5s;
+      line-height: 1;
       margin-bottom: 10px;
+      transition: color 0.4s;
     }
-    .session-timer.on-break { color: var(--amber); }
-    .session-timer.idle { color: var(--text3); }
+    .sz-timer.on-break { color: var(--amber); }
 
-    /* sub label under timer */
-    .session-sub {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text4);
-      margin-bottom: 28px;
-      min-height: 16px;
-      text-align: center;
-    }
-
-    /* tier progress bar */
-    .session-bar-wrap {
-      width: 100%;
-      margin-bottom: 8px;
-    }
-    .session-bar {
+    .sz-bar-wrap { margin-bottom: 6px; }
+    .sz-bar {
       position: relative;
-      height: 5px;
+      height: 4px;
       background: var(--bg4);
-      border-radius: 3px;
+      border-radius: 2px;
       overflow: visible;
     }
-    .session-bar-fill {
+    .sz-bar-fill {
       position: absolute;
       left: 0; top: 0; bottom: 0;
-      border-radius: 3px;
+      border-radius: 2px;
       transition: width 1s linear;
     }
-    .session-bar-tick {
+    .sz-bar-tick {
       position: absolute;
       top: -3px;
-      width: 2px; height: 11px;
+      width: 1.5px; height: 10px;
       background: var(--border);
       border-radius: 1px;
     }
-    .session-bar-scale {
+    .sz-bar-scale {
       display: flex;
       justify-content: space-between;
       font-family: var(--mono);
       font-size: 8px;
       color: var(--text4);
       letter-spacing: 0.06em;
-      margin-top: 6px;
-      margin-bottom: 20px;
-    }
-
-    /* break info */
-    .session-break-info {
-      width: 100%;
-      padding: 10px 14px;
-      background: var(--amber-bg);
-      border: 0.5px solid var(--amber-border);
-      border-radius: 10px;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--amber);
-      margin-bottom: 12px;
-      display: none;
-    }
-    .session-break-info.visible { display: block; }
-
-    .session-break-warning {
-      width: 100%;
-      padding: 10px 14px;
-      background: rgba(196,106,106,0.1);
-      border: 0.5px solid rgba(196,106,106,0.3);
-      border-radius: 10px;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--red);
-      margin-bottom: 12px;
-      display: none;
-      animation: pulse 1s infinite;
-    }
-    .session-break-warning.visible { display: block; }
-
-    /* action buttons */
-    .session-actions {
-      width: 100%;
-      padding: 20px 24px;
-      padding-bottom: max(24px, var(--sab));
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    .session-btn {
-      width: 100%;
-      height: 54px;
-      border-radius: 14px;
-      font-family: var(--mono);
-      font-size: 13px;
-      letter-spacing: 0.08em;
-      font-weight: 600;
-      transition: opacity 0.15s, transform 0.1s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .session-btn:active { opacity: 0.75; transform: scale(0.98); }
-
-    .session-btn-punch-out {
-      background: rgba(196,106,106,0.15);
-      border: 0.5px solid rgba(196,106,106,0.35);
-      color: var(--red);
-    }
-    .session-btn-break {
-      background: var(--amber-bg);
-      border: 0.5px solid var(--amber-border);
-      color: var(--amber);
-    }
-    .session-btn-focus {
-      background: var(--green-bg);
-      border: 0.5px solid var(--green-border);
-      color: var(--green);
-      display: none;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.55; }
-    }
-
-    /* ── REWARDS JAR ───────────────────────────────────────────────────── */
-    .jar-pane {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .jar-visual-row {
-      display: flex;
-      gap: 16px;
-      align-items: flex-end;
-    }
-    .jar-svg-wrap { flex-shrink: 0; }
-    .jar-stats {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .jar-total-amt {
-      font-family: var(--mono);
-      font-size: 36px;
-      font-weight: 700;
-      color: var(--green);
-      line-height: 1;
-    }
-    .jar-total-label {
-      font-family: var(--mono);
-      font-size: 9px;
-      color: var(--text4);
-      letter-spacing: 0.08em;
+      margin-top: 4px;
       margin-bottom: 8px;
     }
-    .prize-lines { display: flex; flex-direction: column; gap: 8px; }
-    .prize-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      background: var(--bg3);
-      border: 0.5px solid var(--border2);
-      border-radius: 11px;
-    }
-    .prize-row.reached { border-color: var(--green-border); background: var(--green-bg); }
-    .prize-row.next { border-color: var(--border); }
-    .prize-key {
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text4);
-      width: 32px;
-      flex-shrink: 0;
-    }
-    .prize-row.reached .prize-key { color: var(--green); }
-    .prize-lbl {
-      flex: 1;
-      font-size: 13px;
-      color: var(--text2);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .prize-amt {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text3);
-      flex-shrink: 0;
-    }
-    .prize-row.reached .prize-amt { color: var(--green); }
 
-    .ledger-section {
-      background: var(--bg3);
-      border: 0.5px solid var(--border2);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-    .ledger-header {
-      padding: 12px 16px;
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text4);
-      border-bottom: 0.5px solid var(--border2);
-    }
-    .ledger-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 11px 16px;
-      border-bottom: 0.5px solid var(--border2);
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text3);
-    }
-    .ledger-row:last-child { border-bottom: none; }
-    .ledger-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-    .ledger-amt { margin-left: auto; color: var(--green); font-size: 11px; }
-    .ledger-empty {
-      padding: 20px 16px;
+    .sz-break-info {
       font-family: var(--mono);
       font-size: 10px;
-      color: var(--text4);
-      text-align: center;
-    }
-
-    /* ── WEEKLY ────────────────────────────────────────────────────────── */
-    .weekly-pane { padding: 16px; display: flex; flex-direction: column; gap: 4px; }
-    .weekly-header {
-      font-family: var(--mono);
-      font-size: 9px;
-      color: var(--text4);
-      letter-spacing: 0.08em;
-      padding: 4px 0 14px;
-    }
-    .weekly-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 13px 0;
-      border-bottom: 0.5px solid var(--border2);
-    }
-    .weekly-row:last-child { border-bottom: none; }
-    .weekly-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .weekly-name { flex: 1; font-size: 14px; color: var(--text2); }
-    .weekly-stats {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text3);
-      text-align: right;
-      line-height: 1.6;
-    }
-
-    /* ── TICKETS ───────────────────────────────────────────────────────── */
-    .tickets-pane { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-
-    .tickets-summary {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      border: 0.5px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .tickets-summary-cell {
-      padding: 14px 8px;
-      text-align: center;
-      border-right: 0.5px solid var(--border);
-    }
-    .tickets-summary-cell:last-child { border-right: none; }
-    .tickets-summary-count {
-      font-family: var(--mono);
-      font-size: 28px;
-      font-weight: 700;
-      line-height: 1;
-    }
-    .tickets-summary-label {
-      font-family: var(--mono);
-      font-size: 8px;
-      letter-spacing: 0.1em;
-      color: var(--text4);
-      margin-top: 5px;
-    }
-
-    .tickets-filter {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      background: var(--bg3);
-      border: 0.5px solid var(--border);
-      border-radius: 9px;
-      overflow: hidden;
-    }
-    .ticket-filter-btn {
-      padding: 9px 6px;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.05em;
-      color: var(--text3);
-      border-right: 0.5px solid var(--border2);
-      transition: background 0.15s, color 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .ticket-filter-btn:last-child { border-right: none; }
-    .ticket-filter-btn.active { background: var(--bg4); color: var(--text); font-weight: 600; }
-
-    .ticket-card {
-      background: var(--bg3);
-      border: 0.5px solid var(--border);
-      border-left-width: 3px;
-      border-radius: 12px;
-      padding: 14px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .ticket-card-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-    }
-    .ticket-card-title {
-      font-family: var(--mono);
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .ticket-card-sub {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text3);
-      margin-top: 3px;
-    }
-    .ticket-device-badge {
-      font-family: var(--mono);
-      font-size: 9px;
-      border-radius: 20px;
-      padding: 3px 10px;
-      letter-spacing: 0.1em;
-      flex-shrink: 0;
-    }
-    .ticket-code {
-      font-family: var(--mono);
-      font-size: 36px;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      color: var(--text);
-      text-align: center;
-      line-height: 1;
-      padding: 6px 0;
-      cursor: pointer;
-    }
-    .ticket-code-hint {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text3);
-      text-align: center;
-      margin-top: 6px;
-    }
-    .ticket-redeem-btn {
-      width: 100%;
-      padding: 11px;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--green);
-      background: rgba(106,173,126,0.1);
-      border: 0.5px solid rgba(106,173,126,0.25);
-      border-radius: 9px;
-      letter-spacing: 0.05em;
-      -webkit-tap-highlight-color: transparent;
-      transition: opacity 0.15s;
-    }
-    .ticket-redeem-btn:active { opacity: 0.7; }
-
-    .ticket-history-card {
-      background: var(--bg3);
-      border: 0.5px solid var(--border);
-      border-radius: 12px;
-      padding: 13px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .ticket-history-info { flex: 1; min-width: 0; }
-    .ticket-history-title {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text2);
-    }
-    .ticket-history-code {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text4);
-      text-decoration: line-through;
-      letter-spacing: 0.08em;
-      margin-left: 8px;
-    }
-    .ticket-history-sub {
-      font-family: var(--mono);
-      font-size: 9px;
-      color: var(--text4);
-      margin-top: 4px;
-    }
-    .ticket-status-pill {
-      font-family: var(--mono);
-      font-size: 9px;
-      border-radius: 20px;
-      padding: 3px 10px;
-      letter-spacing: 0.1em;
-      flex-shrink: 0;
-    }
-
-    .tickets-empty {
-      padding: 40px 0;
-      text-align: center;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text4);
-      letter-spacing: 0.05em;
-    }
-
-    /* ── SHOP CATALOG ──────────────────────────────────────────────────── */
-    .shop-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1px;
-      background: var(--border2);
-      border: 0.5px solid var(--border2);
-      border-radius: 14px;
-      overflow: hidden;
-      margin: 0 12px 4px;
-    }
-    .shop-stat {
-      background: var(--bg3);
-      padding: 14px 10px;
-      text-align: center;
-    }
-    .shop-stat-num {
-      font-family: var(--mono);
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1;
-      margin-bottom: 4px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .shop-stat-lbl {
-      font-family: var(--mono);
-      font-size: 8px;
-      color: var(--text4);
-      letter-spacing: 0.06em;
-      line-height: 1.4;
-    }
-
-    .shop-band {
-      padding: 20px 16px 4px;
-    }
-    .shop-band-eyebrow {
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: 0.1em;
-      color: var(--text4);
-      text-transform: uppercase;
+      color: var(--amber);
       margin-bottom: 6px;
+      min-height: 14px;
     }
-    .shop-band-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-    .shop-band-sub {
-      font-size: 13px;
-      color: var(--text3);
-    }
-
-    .cat-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      padding: 12px;
-    }
-    @media (min-width: 500px) { .cat-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (min-width: 700px) { .cat-grid { grid-template-columns: repeat(4, 1fr); } }
-
-    .cat-card {
-      background: var(--bg3);
-      border: 0.5px solid var(--border2);
-      border-radius: 14px;
-      padding: 16px 14px;
-      min-height: 140px;
-      display: flex;
-      flex-direction: column;
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s;
-      position: relative;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .cat-card:active { background: var(--bg4); }
-    .cat-card.active { background: var(--bg4); border-color: var(--gold); }
-    .cat-card.add {
-      align-items: center;
-      justify-content: center;
-      color: var(--text4);
-      border-style: dashed;
-    }
-    .cat-card.add:active { color: var(--gold); }
-
-    .cat-idx {
-      font-family: var(--mono);
-      font-size: 9px;
-      color: var(--text4);
-      letter-spacing: 0.06em;
-      margin-bottom: 10px;
-    }
-    .cat-icon { margin-bottom: 10px; }
-    .cat-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-    .cat-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 3px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .cat-cap {
-      font-family: var(--mono);
-      font-size: 9px;
-      color: var(--text4);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      flex: 1;
-    }
-    .cat-price {
+    .sz-break-warning {
       font-family: var(--mono);
       font-size: 10px;
-      color: var(--gold);
-      margin-top: 10px;
+      color: var(--red);
+      margin-bottom: 6px;
+      animation: pulse 1s infinite;
+      min-height: 14px;
     }
 
-    /* buy panel — slides in below the grid */
-    .cat-buy-panel {
-      margin: 0 12px 12px;
-      background: var(--bg3);
-      border: 0.5px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      max-height: 0;
-      transition: max-height 0.28s ease, opacity 0.2s;
-      opacity: 0;
-    }
-    .cat-buy-panel.open { max-height: 400px; opacity: 1; }
-    .cat-buy-inner { padding: 18px; }
-    .cat-buy-item-lbl {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text3);
+    .sz-btns {
+      display: flex;
+      gap: 8px;
       margin-bottom: 14px;
-      line-height: 1.6;
     }
-    .cat-buy-confirm {
-      width: 100%;
-      height: 48px;
-      border-radius: 11px;
-      font-family: var(--mono);
-      font-size: 12px;
-      letter-spacing: 0.06em;
-      color: var(--green);
-      background: var(--green-bg);
-      border: 0.5px solid var(--green-border);
-      margin-top: 12px;
-      -webkit-tap-highlight-color: transparent;
-      transition: opacity 0.15s;
-    }
-    .cat-buy-confirm:active { opacity: 0.7; }
-    .cat-buy-msg {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text3);
-      line-height: 1.6;
-    }
-
-    .shop-foot {
+    .sz-btn {
+      flex: 1;
+      height: 38px;
+      border-radius: 10px;
       font-family: var(--mono);
       font-size: 10px;
-      color: var(--text4);
-      text-align: center;
-      padding: 8px 16px 20px;
-      letter-spacing: 0.04em;
-    }
-
-    /* ── PUNCH LOG ─────────────────────────────────────────────────────── */
-    .log-pane { padding: 12px; display: flex; flex-direction: column; gap: 20px; }
-
-    .log-date-group { display: flex; flex-direction: column; gap: 2px; }
-
-    .log-date-label {
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text4);
-      padding: 4px 4px 8px;
-    }
-
-    .log-entry {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 13px 14px;
-      background: var(--bg3);
-      border: 0.5px solid var(--border2);
-      border-radius: 12px;
-    }
-
-    .log-entry-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .log-entry-info { flex: 1; min-width: 0; }
-
-    .log-entry-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      margin-bottom: 3px;
-    }
-
-    .log-entry-meta {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text3);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .log-tier-pill {
-      font-size: 8px;
       letter-spacing: 0.08em;
-      padding: 2px 6px;
-      border-radius: 20px;
-      border: 0.5px solid currentColor;
-      opacity: 0.85;
-    }
-
-    .log-clips-badge {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      font-family: var(--mono);
-      font-size: 9px;
-      color: var(--text4);
-    }
-
-    .log-entry-right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-
-    .log-entry-dur {
-      font-family: var(--mono);
-      font-size: 12px;
       font-weight: 600;
-      color: var(--text2);
+      transition: opacity 0.15s;
+      -webkit-tap-highlight-color: transparent;
     }
+    .sz-btn:active { opacity: 0.7; }
+    .sz-btn-out   { color: var(--red);   background: rgba(196,106,106,0.12); border: 0.5px solid rgba(196,106,106,0.3); }
+    .sz-btn-break { color: var(--amber); background: var(--amber-bg);        border: 0.5px solid var(--amber-border); }
+    .sz-btn-focus { color: var(--green); background: var(--green-bg);        border: 0.5px solid var(--green-border); }
 
-    .log-clip-dots { display: flex; gap: 3px; flex-wrap: wrap; justify-content: flex-end; max-width: 60px; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-    .log-clip-dot {
-      width: 8px; height: 8px;
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-
-    .log-empty {
-      padding: 48px 20px;
-      text-align: center;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text4);
-      letter-spacing: 0.05em;
-    }
-
+    /* ── BOTTOM SHEET ──────────────────────────────────────────────────── */
     /* ── BOTTOM SHEET ──────────────────────────────────────────────────── */
     #bottom-sheet-overlay {
       position: fixed;
@@ -2086,10 +1421,37 @@
 
       <!-- goals sub-panel (default) -->
       <div class="clock-panel active" id="cp-goals">
+
+        <!-- inline session zone — shown when punched in -->
+        <div id="session-zone">
+          <div class="sz-goal-row">
+            <div class="sz-dot" id="sz-dot"></div>
+            <span class="sz-goal-name" id="sz-goal-name"></span>
+            <span class="sz-phase" id="sz-phase">focus</span>
+          </div>
+          <div class="sz-timer" id="sz-timer">00:00:00</div>
+          <div class="sz-bar-wrap">
+            <div class="sz-bar">
+              <div class="sz-bar-fill" id="sz-bar-fill"></div>
+              <span class="sz-bar-tick" id="sz-tick-mvd" style="left:33%;"></span>
+              <span class="sz-bar-tick" id="sz-tick-av"  style="left:66%;"></span>
+            </div>
+            <div class="sz-bar-scale"><span>MVD</span><span>AV</span><span>BSD</span></div>
+          </div>
+          <div class="sz-break-info"  id="sz-break-info"></div>
+          <div class="sz-break-warning" id="sz-break-warning"></div>
+          <div class="sz-btns">
+            <button class="sz-btn sz-btn-focus" id="sz-focus-btn" onclick="onFocusBtn()" style="display:none;">back to focus</button>
+            <button class="sz-btn sz-btn-break" id="sz-break-btn" onclick="onBreakBtn()">take break</button>
+            <button class="sz-btn sz-btn-out"   onclick="onPunchOut()">punch out</button>
+          </div>
+        </div>
+
         <div id="reorder-bar">
           <span class="reorder-hint">⠿ drag to reorder</span>
           <button class="reorder-done-btn" onclick="exitReorderMode()">Done</button>
         </div>
+
         <div id="goal-list">
           <div class="list-empty">loading…</div>
         </div>
@@ -2298,57 +1660,6 @@
       <div class="locked-hint">Or sync down manually from PC to continue here.</div>
     </div>
   </div>
-  <div id="session-screen">
-
-    <!-- header -->
-    <div class="session-header">
-      <button class="session-back" onclick="closeSession()">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <div class="session-goal-dot" id="session-dot" style="background:#6aad7e;"></div>
-      <span class="session-goal-name" id="session-goal-name">Study</span>
-    </div>
-
-    <!-- body -->
-    <div class="session-body">
-      <div class="session-phase" id="session-phase">focus</div>
-
-      <div class="session-timer" id="session-timer">00:00:00</div>
-      <div class="session-sub" id="session-sub">punched in</div>
-
-      <!-- tier bar -->
-      <div class="session-bar-wrap">
-        <div class="session-bar">
-          <div class="session-bar-fill" id="session-bar-fill" style="width:62%;background:#6aad7e;"></div>
-          <span class="session-bar-tick" style="left:33%;"></span>
-          <span class="session-bar-tick" style="left:66%;"></span>
-        </div>
-        <div class="session-bar-scale"><span>MVD</span><span>AV</span><span>BSD</span></div>
-      </div>
-
-      <!-- break info -->
-      <div class="session-break-info" id="session-break-info">
-        break balance: <span id="session-break-balance">12:00</span> remaining
-      </div>
-      <div class="session-break-warning" id="session-break-warning">
-        ⚠ break overrun — punching out in <span id="session-countdown">60</span>s
-      </div>
-    </div>
-
-    <!-- actions -->
-    <div class="session-actions">
-      <button class="session-btn session-btn-focus" id="session-focus-btn" onclick="onFocusBtn()">
-        back to focus
-      </button>
-      <button class="session-btn session-btn-break" id="session-break-btn" onclick="onBreakBtn()">
-        take break
-      </button>
-      <button class="session-btn session-btn-punch-out" onclick="onPunchOut()">
-        punch out
-      </button>
-    </div>
-
-  </div><!-- /session-screen -->
 
 </div><!-- /app -->
 
@@ -3460,10 +2771,10 @@
   let _sessionInterval = null;
   function openSession(goalName, goalColor) {
     const act = S.active(); if (!act) return;
-    document.getElementById('session-goal-name').textContent = goalName;
-    document.getElementById('session-dot').style.background  = goalColor;
+    document.getElementById('sz-dot').style.background = goalColor;
+    document.getElementById('sz-goal-name').textContent = goalName;
+    document.getElementById('session-zone').classList.add('active');
     updateSessionUI();
-    document.getElementById('session-screen').classList.add('open');
     requestWakeLock();
     startSessionNotification(goalName);
     clearInterval(_sessionInterval);
@@ -3471,56 +2782,72 @@
   }
 
   function closeSession() {
-    document.getElementById('session-screen').classList.remove('open');
-    clearInterval(_sessionInterval);
-    // don't release wake lock here — session is still active, just navigated back
+    // session-zone stays visible while session active — no close action
+    // (no back button needed — inline with goals)
   }
 
   function updateSessionUI() {
-    const act = S.active(); if (!act) return;
+    const act = S.active();
+    const zone = document.getElementById('session-zone');
+    if (!act) { if (zone) zone.classList.remove('active'); return; }
+
     const focusSecs = S.focusElapsedSecs(act);
     const onBreak   = act.breakActive;
     const g         = S.goalById(act.goalId);
 
-    // update tier bar
-    const barFill = document.getElementById('session-bar-fill');
+    // timer
+    const timerEl = document.getElementById('sz-timer');
+    if (timerEl) {
+      timerEl.textContent = fmtHMS(focusSecs);
+      timerEl.className   = 'sz-timer' + (onBreak ? ' on-break' : '');
+    }
+
+    // phase
+    const phaseEl = document.getElementById('sz-phase');
+    if (phaseEl) phaseEl.textContent = onBreak ? 'on break' : 'focus';
+
+    // tier bar
+    const barFill = document.getElementById('sz-bar-fill');
     if (barFill && g) {
       const todayKey  = S.today();
       const todaySecs = ((g.dailySecs && g.dailySecs[todayKey]) || 0) + focusSecs;
       const hasTiers  = g.mvdVal && g.bsdVal;
       const pct       = hasTiers ? Math.min(100, (todaySecs / g.bsdVal) * 100) : Math.min(100, todaySecs / 3600 * 33);
-      barFill.style.width = pct + '%';
+      barFill.style.width      = pct + '%';
       barFill.style.background = g.color || '#6aad7e';
-      // update ticks
-      const ticks = barFill.parentElement.querySelectorAll('.session-bar-tick');
-      if (hasTiers && ticks.length >= 2) {
-        ticks[0].style.left = Math.min(99, (g.mvdVal / g.bsdVal) * 100) + '%';
-        ticks[1].style.left = Math.min(99, (g.avVal  / g.bsdVal) * 100) + '%';
+      const mvdTick = document.getElementById('sz-tick-mvd');
+      const avTick  = document.getElementById('sz-tick-av');
+      if (hasTiers && mvdTick && avTick) {
+        mvdTick.style.left = Math.min(99, (g.mvdVal / g.bsdVal) * 100) + '%';
+        avTick.style.left  = Math.min(99, (g.avVal  / g.bsdVal) * 100) + '%';
       }
     }
-    document.getElementById('session-timer').className = 'session-timer' + (onBreak ? ' on-break' : '');
-    document.getElementById('session-timer').textContent = fmtHMS(focusSecs);
-    document.getElementById('session-phase').textContent = onBreak ? 'break' : 'focus';
-    document.getElementById('session-sub').textContent   = onBreak ? 'on break' : 'punched in';
-    document.getElementById('session-focus-btn').style.display = onBreak ? '' : 'none';
-    document.getElementById('session-break-btn').style.display = onBreak ? 'none' : '';
-    const infoEl = document.getElementById('session-break-info');
-    const warnEl = document.getElementById('session-break-warning');
+
+    // break / focus buttons
+    const focusBtn = document.getElementById('sz-focus-btn');
+    const breakBtn = document.getElementById('sz-break-btn');
+    if (focusBtn) focusBtn.style.display = onBreak ? '' : 'none';
+    if (breakBtn) breakBtn.style.display = onBreak ? 'none' : '';
+
+    // break info
+    const infoEl = document.getElementById('sz-break-info');
+    const warnEl = document.getElementById('sz-break-warning');
     if (onBreak) {
       const allowedSecs = Math.floor(focusSecs / 4);
       const spentSecs   = Math.floor((Date.now() - act.breakStartAt) / 1000);
       const remaining   = allowedSecs - spentSecs;
       if (remaining >= 0) {
-        infoEl.classList.add('visible'); warnEl.classList.remove('visible');
-        document.getElementById('session-break-balance').textContent = fmtMS(remaining);
+        if (infoEl) infoEl.textContent = 'break · ' + fmtMS(remaining) + ' remaining';
+        if (warnEl) warnEl.textContent = '';
       } else {
-        infoEl.classList.remove('visible'); warnEl.classList.add('visible');
+        if (infoEl) infoEl.textContent = '';
         const countdown = 60 + remaining;
-        document.getElementById('session-countdown').textContent = Math.max(0, countdown);
+        if (warnEl) warnEl.textContent = '⚠ break overrun — punching out in ' + Math.max(0, countdown) + 's';
         if (countdown <= 0) onPunchOut();
       }
     } else {
-      infoEl.classList.remove('visible'); warnEl.classList.remove('visible');
+      if (infoEl) infoEl.textContent = '';
+      if (warnEl) warnEl.textContent = '';
     }
   }
 
@@ -3552,13 +2879,11 @@
     let tierResult = null;
 
     if (g) {
-      // credit daily secs
       const todayKey        = S.today();
       g.dailySecs           = g.dailySecs || {};
       g.dailySecs[todayKey] = (g.dailySecs[todayKey] || 0) + focusSecs;
       g.totalSecs           = (g.totalSecs || 0) + focusSecs;
 
-      // compute tier from today's total
       const todaySecs = g.dailySecs[todayKey];
       if (g.mvdVal && g.bsdVal) {
         if      (todaySecs >= g.bsdVal) tierResult = { tier:'Best Day',          clips: g.bsdClips || 3 };
@@ -3566,7 +2891,6 @@
         else if (todaySecs >= g.mvdVal) tierResult = { tier:'Minimum Viable Day', clips: g.mvdClips || 1 };
       }
 
-      // only award clips if newly reached a higher tier than today's previous best
       const tierOrder = { 'Minimum Viable Day':1, 'Average Day':2, 'Best Day':3 };
       const logs      = S.log();
       const todayLogs = logs.filter(e => String(e.goalId) === String(act.goalId) && e.date === todayKey);
@@ -3579,22 +2903,20 @@
         S.addToHolding(act.goalId, drawnClips);
       }
 
-      // save log entry
       logs.push({
-        id:          now,
-        goalId:      act.goalId,
-        goalName:    g.name,
-        date:        todayKey,
-        punchIn:     act.punchInAt,
-        punchOut:    now,
+        id:           now,
+        goalId:       act.goalId,
+        goalName:     g.name,
+        date:         todayKey,
+        punchIn:      act.punchInAt,
+        punchOut:     now,
         durationSecs: focusSecs,
-        tierResult:  tierResult ? tierResult.tier : null,
-        clipsEarned: drawnClips.length,
-        clipsDrawn:  drawnClips,
+        tierResult:   tierResult ? tierResult.tier : null,
+        clipsEarned:  drawnClips.length,
+        clipsDrawn:   drawnClips,
       });
       S.saveLog(logs);
 
-      // pato system
       S.ensurePatoFields(g);
       S.syncPatoStreak(g);
       S.tryEarnPato(g, todaySecs);
@@ -3604,9 +2926,10 @@
     S.saveActive(null);
     releaseWakeLock();
     stopSessionNotification();
-    document.getElementById('session-screen').classList.remove('open');
+    document.getElementById('session-zone').classList.remove('active');
     renderGoals();
   }
+
 
   const WHEEL_SEGMENTS = [
     { id:'t1',      label:'Tier 1',  pct:40, color:'#6aad7e' },
