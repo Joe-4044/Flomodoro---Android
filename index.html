@@ -1884,7 +1884,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 32px;
+      padding: calc(40px + var(--sat)) 32px calc(40px + var(--sab));
       text-align: center;
     }
     #locked-screen.visible { display: flex; }
@@ -2281,6 +2281,8 @@
     </div>
   </div>
 
+</div><!-- /app -->
+
   <!-- ── LOCKED SCREEN ── -->
   <div id="locked-screen">
     <div class="locked-inner">
@@ -2296,8 +2298,6 @@
       <div class="locked-hint">Or sync down manually from PC to continue here.</div>
     </div>
   </div>
-
-  <!-- ── SESSION SCREEN ── -->
   <div id="session-screen">
 
     <!-- header -->
@@ -4551,13 +4551,10 @@
 
   function showLockedScreen() {
     document.getElementById('locked-screen').classList.add('visible');
-    // hide main app UI
-    document.getElementById('app').style.display = 'none';
   }
 
   function hideLockedScreen() {
     document.getElementById('locked-screen').classList.remove('visible');
-    document.getElementById('app').style.display = '';
   }
 
   // ── PULL TO REFRESH ───────────────────────────────────────────────────
