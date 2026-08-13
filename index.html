@@ -2631,21 +2631,17 @@
     try {
       const { activeDevice, syncState } = await window.fbBootCheck();
 
-      if (activeDevice === 'pc') {
+      // PC is the default owner — lock Android unless token is explicitly 'android'
+      if (activeDevice !== 'android') {
         showLockedScreen();
         return;
       }
 
-      // Android is active (or no token yet — first time setup)
+      // Android is active — import synced state from PC if available
       if (syncState && syncState.syncedFrom === 'pc') {
-        // import state synced down from PC
         importSyncState(syncState);
       } else {
         S.ensureSeed();
-      }
-      // set token to android if not already set
-      if (!activeDevice) {
-        window.fbBootCheck && fbClaimToken();
       }
 
     } catch(e) {
@@ -2653,11 +2649,6 @@
       S.ensureSeed();
     }
     goLive();
-  }
-
-  function fbClaimToken() {
-    // no-op here — token already set by Sync Down on PC side
-    // if first boot, activeDevice stays null which means android is live
   }
 
   function importSyncState(syncState) {
@@ -4666,9 +4657,9 @@
   window.addEventListener('offline', () => setOfflineBanner(true));
   if (!navigator.onLine) setOfflineBanner(true);
 
-  // also show banner if Firebase hasn't responded after 5s
+  // show banner if app hasn't booted after 5s
   setTimeout(() => {
-    if (!_initDone) setOfflineBanner(true);
+    if (!navigator.onLine) setOfflineBanner(true);
   }, 5000);
 
   // ── FORMAT HELPERS ────────────────────────────────────────────────────
