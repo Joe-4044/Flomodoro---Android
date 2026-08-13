@@ -1847,6 +1847,33 @@
     }
     #offline-banner.visible { display: flex; }
 
+    /* ── PULL TO REFRESH ───────────────────────────────────────────────── */
+    .ptr-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 0;
+      overflow: hidden;
+      transition: height 0.2s;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text4);
+      letter-spacing: 0.08em;
+      flex-shrink: 0;
+    }
+    .ptr-indicator.visible { height: 44px; }
+    .ptr-indicator.refreshing { color: var(--green); }
+    .ptr-spinner {
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      display: none;
+    }
+    .ptr-indicator.refreshing .ptr-spinner { display: block; animation: ptr-spin 0.7s linear infinite; }
+    @keyframes ptr-spin { to { transform: rotate(360deg); } }
+
     /* ── TABLET ADJUSTMENTS ────────────────────────────────────────────── */
     @media (min-width: 600px) {
       #goal-list { padding: 16px; gap: 12px; }
@@ -1892,6 +1919,12 @@
         <button class="subnav-btn" onclick="switchClock('weekly')">Weekly</button>
         <button class="subnav-btn" onclick="switchClock('tickets')">Tickets</button>
         <button class="subnav-btn" onclick="switchClock('blockers')">Blockers</button>
+      </div>
+
+      <!-- pull to refresh indicator -->
+      <div class="ptr-indicator" id="ptr-indicator">
+        <div class="ptr-spinner"></div>
+        <span id="ptr-label">↓ pull to refresh</span>
       </div>
 
       <!-- goals sub-panel (default) -->
@@ -2101,91 +2134,62 @@
 
   <!-- Firebase SDK -->
   <script type="module">
-    import { initializeApp }                        from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js";
+  import { initializeApp }                from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
+  import { getDatabase, ref, set, get }   from "https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey:            "AIzaSyBHi-TrRw-IZLxXZY-ppbm5ZTP_rWOJxD0",
-      authDomain:        "flomodoro-v4.firebaseapp.com",
-      projectId:         "flomodoro-v4",
-      databaseURL:       "https://flomodoro-v4-default-rtdb.firebaseio.com",
-      storageBucket:     "flomodoro-v4.firebasestorage.app",
-      messagingSenderId: "214364487895",
-      appId:             "1:214364487895:web:e24bcc5adac224032b3092"
-    };
+  const firebaseConfig = {
+    apiKey:            "AIzaSyBHi-TrRw-IZLxXZY-ppbm5ZTP_rWOJxD0",
+    authDomain:        "flomodoro-v4.firebaseapp.com",
+    projectId:         "flomodoro-v4",
+    databaseURL:       "https://flomodoro-v4-default-rtdb.firebaseio.com",
+    storageBucket:     "flomodoro-v4.firebasestorage.app",
+    messagingSenderId: "214364487895",
+    appId:             "1:214364487895:web:e24bcc5adac224032b3092"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db  = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
 
-    // ── write helpers ────────────────────────────────────────────────────
-    function fbSet(path, value) {
-      return set(ref(db, path), value);
-    }
+  function fbSet(path, value) { return set(ref(db, path), value ?? null); }
+  function fbGet(path)        { return get(ref(db, path)).then(s => s.val()); }
 
-    // ── sync session live (called on every session state change) ─────────
-    window.fbSyncSession = function(sessionData) {
-      fbSet('session', sessionData || null);
-    };
+  // ── write helpers exposed to main script ─────────────────────────────
+  window.fbSyncSession = function(data) { fbSet('session', data || null); };
 
-    // ── sync wallet/tickets/catalog on change ────────────────────────────
-    window.fbSyncState = function(data) {
-      window._fbSelfWriting = true;
-      Promise.all([
-        fbSet('wallet',  data.wallet  ?? null),
-        fbSet('goals',   data.goals   ?? null),
-        fbSet('tickets', data.tickets ?? null),
-        fbSet('catalog', data.catalog ?? null),
-        fbSet('jar',     data.jar     ?? null),
-        fbSet('weekly',  data.weekly  ?? null),
-      ]).finally(() => {
-        setTimeout(() => { window._fbSelfWriting = false; }, 2000);
-      });
-    };
+  window.fbSyncState = function(data) {
+    fbSet('wallet',  data.wallet  ?? null);
+    fbSet('goals',   data.goals   ?? null);
+    fbSet('tickets', data.tickets ?? null);
+    fbSet('catalog', data.catalog ?? null);
+    fbSet('jar',     data.jar     ?? null);
+    fbSet('weekly',  data.weekly  ?? null);
+  };
 
-    window.fbPushRedemption = function(redemption) {
-      fbSet('redemptions/active', redemption ?? null);
-    };
+  window.fbPushRedemption = function(r) { fbSet('redemptions/active', r ?? null); };
 
-    // ── listen for session changes (so PC can see mobile session) ────────
-    const sessionRef = ref(db, 'session');
-    onValue(sessionRef, (snapshot) => {
-      const data = snapshot.val();
-      if (window.onFirebaseSession) window.onFirebaseSession(data);
-    });
+  // ── poll Firebase every 15 seconds ───────────────────────────────────
+  async function poll() {
+    try {
+      const [goals, jar, catalog, tickets] = await Promise.all([
+        fbGet('goals'), fbGet('jar'), fbGet('catalog'), fbGet('tickets')
+      ]);
+      if (window._applyAndRender) window._applyAndRender({ goals, jar, catalog, tickets });
+    } catch(e) {}
+  }
 
-    // ── listen for PC-owned nodes individually ────────────────────────────
-    // Listening to '/' causes echo loops when Android writes — instead
-    // listen to specific nodes PC pushes so we only react to PC changes
-    function makeNodeListener(path, key) {
-      onValue(ref(db, path), (snapshot) => {
-        if (window.onFirebaseNodeUpdate) window.onFirebaseNodeUpdate(key, snapshot.val());
-      });
-    }
-    makeNodeListener('goals',   'goals');
-    makeNodeListener('jar',     'jar');
-    makeNodeListener('catalog', 'catalog');
-    makeNodeListener('tickets', 'tickets');
+  window._fbForceSync = poll;
 
-    // ── force sync ────────────────────────────────────────────────────────
-    window._fbForceSync = function() {
-      Promise.all([
-        get(ref(db, 'goals')),
-        get(ref(db, 'jar')),
-        get(ref(db, 'catalog')),
-        get(ref(db, 'tickets')),
-      ]).then(([goals, jar, catalog, tickets]) => {
-        if (window._applyAndRender) window._applyAndRender({
-          goals:   goals.val(),
-          jar:     jar.val(),
-          catalog: catalog.val(),
-          tickets: tickets.val(),
-        });
-      }).catch(() => {});
-    };
-
-    window._fbReady = true;
+  // ── initial load then start polling ──────────────────────────────────
+  poll().then(() => {
     if (window.onFirebaseReady) window.onFirebaseReady();
-  </script>
+  });
+  setInterval(poll, 15000);
+
+  // also poll immediately when app is foregrounded
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') poll();
+  });
+</script>
 
 <script>
   // ══════════════════════════════════════════════════════════════════════
@@ -2405,22 +2409,22 @@
     localStorage.setItem('fv4_version', _APP_VERSION);
   }
 
-  // Don't seed yet — wait for Firebase to respond first.
-  // onFirebaseState will either load remote state or fall back to seed.
-  // If Firebase hasn't responded within 3 seconds, seed and render anyway.
+  // ── init ──────────────────────────────────────────────────────────────
+  // _applyAndRender is called by the Firebase poll on first load.
+  // If Firebase hasn't responded in 3s, seed locally and render anyway.
   let _initDone = false;
-  function _doInit(fromFirebase) {
+  function _doInit() {
     if (_initDone) return;
     _initDone = true;
-    if (!fromFirebase) S.ensureSeed();
+    S.ensureSeed();
     renderGoals();
-    const _resumeAct = S.active();
-    if (_resumeAct) {
-      const _resumeGoal = S.goalById(_resumeAct.goalId);
-      if (_resumeGoal) openSession(_resumeGoal.name, _resumeGoal.color || '#6aad7e');
+    const act = S.active();
+    if (act) {
+      const g = S.goalById(act.goalId);
+      if (g) openSession(g.name, g.color || '#6aad7e');
     }
   }
-  setTimeout(() => _doInit(false), 3000); // fallback if Firebase is slow
+  setTimeout(_doInit, 3000); // fallback if Firebase is slow
 
   // ══════════════════════════════════════════════════════════════════════
   // GOALS LIST — driven by S
@@ -3177,43 +3181,9 @@
 
   // ── Firebase node update handler ──────────────────────────────────────
   // Accumulates node updates until we have enough to init, then stays live
-  const _fbNodes = {};
-  let _fbInitialNodeCount = 0;
-  const _FB_INIT_NODES = ['goals', 'jar', 'catalog', 'tickets'];
-  let _fbSelfWriting = false; // true while Android is pushing — ignore echo
+  // ── Firebase ready ──────────────────────────────────────────────────
+  window.onFirebaseReady = function() {};
 
-  window.onFirebaseNodeUpdate = function(key, value) {
-    if (_fbSelfWriting) return;
-    _fbNodes[key] = value;
-
-    if (!_initDone) {
-      // count how many of the expected nodes have arrived
-      _fbInitialNodeCount = _FB_INIT_NODES.filter(k => k in _fbNodes).length;
-      if (_fbInitialNodeCount >= _FB_INIT_NODES.length) {
-        // all nodes received — init from Firebase
-        const hasData = _fbNodes.goals || _fbNodes.catalog;
-        if (hasData) {
-          _applyFirebaseState(_fbNodes);
-          _doInit(true);
-        } else {
-          localStorage.removeItem('fv4_seeded');
-          _doInit(false);
-          _fbPushFullState();
-        }
-      }
-    } else {
-      // already initialized — apply live update
-      _applyAndRender(_fbNodes);
-    }
-  };
-
-  window.onFirebaseSession = function(data) {
-    // mobile owns session — no action needed
-  };
-
-  window.onFirebaseReady = function() {
-    // node listeners handle everything — no action needed here
-  };
 
   function _applyFirebaseGoals(rawGoals) {
     const goalsArr = Array.isArray(rawGoals)
@@ -3269,9 +3239,7 @@
     localStorage.setItem('fv4_seeded', 'true');
   }
 
-  window.onFirebaseSession = function(data) {
-    // mobile owns the session — no action needed
-  };
+
 
   function _fbPushSession() {
     if (!window.fbSyncSession) return;
@@ -4373,22 +4341,103 @@
   function _applyAndRender(data) {
     if (!data) return;
     _applyFirebaseState(data);
-    renderGoals();
-    if (document.getElementById('cp-jar')?.classList.contains('active'))      renderJarPane();
-    if (document.getElementById('cp-weekly')?.classList.contains('active'))   renderWeeklyPane();
-    if (document.getElementById('cp-tickets')?.classList.contains('active'))  renderTicketsPane();
-    if (document.getElementById('cp-blockers')?.classList.contains('active')) renderBlockerPane();
-    if (document.getElementById('cp-log')?.classList.contains('active'))      renderLogPane();
-    if (document.getElementById('panel-shop')?.classList.contains('active'))  renderShop();
+    if (!_initDone) {
+      _doInit();
+    } else {
+      renderGoals();
+      if (document.getElementById('cp-jar')?.classList.contains('active'))      renderJarPane();
+      if (document.getElementById('cp-weekly')?.classList.contains('active'))   renderWeeklyPane();
+      if (document.getElementById('cp-tickets')?.classList.contains('active'))  renderTicketsPane();
+      if (document.getElementById('cp-blockers')?.classList.contains('active')) renderBlockerPane();
+      if (document.getElementById('cp-log')?.classList.contains('active'))      renderLogPane();
+      if (document.getElementById('panel-shop')?.classList.contains('active'))  renderShop();
+    }
   }
   window._applyAndRender = _applyAndRender;
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      if (S.active()) requestWakeLock();
-      if (window._fbForceSync) window._fbForceSync();
+  // ── PULL TO REFRESH ───────────────────────────────────────────────────
+  (function() {
+    let _ptrStartY   = 0;
+    let _ptrDelta    = 0;
+    let _ptrActive   = false;
+    let _ptrRefreshing = false;
+    const THRESHOLD  = 72; // px pull needed to trigger refresh
+
+    function ptrIndicator()  { return document.getElementById('ptr-indicator'); }
+    function ptrLabel()      { return document.getElementById('ptr-label'); }
+
+    function ptrShow(delta) {
+      const el = ptrIndicator();
+      if (!el) return;
+      el.classList.add('visible');
+      el.classList.remove('refreshing');
+      ptrLabel().textContent = delta >= THRESHOLD ? '↑ release to refresh' : '↓ pull to refresh';
     }
-  });
+
+    function ptrHide() {
+      const el = ptrIndicator();
+      if (!el) return;
+      el.classList.remove('visible');
+      el.classList.remove('refreshing');
+    }
+
+    async function ptrRefresh() {
+      if (_ptrRefreshing) return;
+      _ptrRefreshing = true;
+      const el = ptrIndicator();
+      if (el) {
+        el.classList.add('visible', 'refreshing');
+        ptrLabel().textContent = 'refreshing…';
+      }
+      // poll Firebase
+      if (window._fbForceSync) {
+        await new Promise(r => setTimeout(r, 800)); // min visual time
+        window._fbForceSync();
+        await new Promise(r => setTimeout(r, 600));
+      }
+      ptrHide();
+      _ptrRefreshing = false;
+    }
+
+    // attach to the clock panel and shop panel
+    function getScrollEl() {
+      // find the active scroll container
+      const activePanel = document.querySelector('.clock-panel.active .scroll-content, #cp-goals');
+      if (activePanel) return activePanel;
+      if (document.getElementById('panel-shop')?.classList.contains('active')) {
+        return document.querySelector('#panel-shop .scroll-content');
+      }
+      return null;
+    }
+
+    document.addEventListener('touchstart', e => {
+      const el = getScrollEl();
+      if (!el) return;
+      if (el.scrollTop > 0) return; // only trigger when at top
+      _ptrStartY  = e.touches[0].clientY;
+      _ptrActive  = true;
+      _ptrDelta   = 0;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', e => {
+      if (!_ptrActive || _ptrRefreshing) return;
+      const el = getScrollEl();
+      if (!el || el.scrollTop > 2) { _ptrActive = false; ptrHide(); return; }
+      _ptrDelta = Math.max(0, e.touches[0].clientY - _ptrStartY);
+      if (_ptrDelta > 10) ptrShow(_ptrDelta);
+    }, { passive: true });
+
+    document.addEventListener('touchend', () => {
+      if (!_ptrActive) return;
+      _ptrActive = false;
+      if (_ptrDelta >= THRESHOLD) {
+        ptrRefresh();
+      } else {
+        ptrHide();
+      }
+      _ptrDelta = 0;
+    });
+  })();
 
   // ── OFFLINE FALLBACK ──────────────────────────────────────────────────
   function setOfflineBanner(visible) {
