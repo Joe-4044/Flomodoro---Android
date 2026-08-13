@@ -2102,7 +2102,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp }                        from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, off } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js";
+    import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey:            "AIzaSyBHi-TrRw-IZLxXZY-ppbm5ZTP_rWOJxD0",
@@ -2148,26 +2148,34 @@
       if (window.onFirebaseSession) window.onFirebaseSession(data);
     });
 
-    // ── listen for full state changes ─────────────────────────────────────
-    const stateRef = ref(db, '/');
-    onValue(stateRef, (snapshot) => {
-      const data = snapshot.val();
-      if (window.onFirebaseState) window.onFirebaseState(data);
-    });
+    // ── listen for PC-owned nodes individually ────────────────────────────
+    // Listening to '/' causes echo loops when Android writes — instead
+    // listen to specific nodes PC pushes so we only react to PC changes
+    function makeNodeListener(path, key) {
+      onValue(ref(db, path), (snapshot) => {
+        if (window.onFirebaseNodeUpdate) window.onFirebaseNodeUpdate(key, snapshot.val());
+      });
+    }
+    makeNodeListener('goals',   'goals');
+    makeNodeListener('jar',     'jar');
+    makeNodeListener('catalog', 'catalog');
+    makeNodeListener('tickets', 'tickets');
 
-    // ── force sync — called when app is foregrounded ───────────────────────
+    // ── force sync ────────────────────────────────────────────────────────
     window._fbForceSync = function() {
-      import("https://www.gstatic.com/firebasejs/12.17.0/firebase-database.js")
-        .then(({ get }) => get(stateRef))
-        .then(snapshot => {
-          const data = snapshot.val();
-          if (data && window.onFirebaseState) {
-            // temporarily reset firstFirebaseRead so the handler treats this as a live update
-            window._fbForceSyncData = data;
-            if (window._applyAndRender) window._applyAndRender(data);
-          }
-        })
-        .catch(() => {});
+      Promise.all([
+        get(ref(db, 'goals')),
+        get(ref(db, 'jar')),
+        get(ref(db, 'catalog')),
+        get(ref(db, 'tickets')),
+      ]).then(([goals, jar, catalog, tickets]) => {
+        if (window._applyAndRender) window._applyAndRender({
+          goals:   goals.val(),
+          jar:     jar.val(),
+          catalog: catalog.val(),
+          tickets: tickets.val(),
+        });
+      }).catch(() => {});
     };
 
     window._fbReady = true;
@@ -3162,30 +3170,42 @@
     el.addEventListener('pointermove',  () => clearTimeout(_longPressTimer));
   }
 
-  // ── Firebase callbacks ────────────────────────────────────────────────
-  let _firstFirebaseRead = true;
+  // ── Firebase node update handler ──────────────────────────────────────
+  // Accumulates node updates until we have enough to init, then stays live
+  const _fbNodes = {};
+  let _fbInitialNodeCount = 0;
+  const _FB_INIT_NODES = ['goals', 'jar', 'catalog', 'tickets'];
 
-  window.onFirebaseReady = function() {
-    // wait for onFirebaseState to fire with actual data
-  };
+  window.onFirebaseNodeUpdate = function(key, value) {
+    _fbNodes[key] = value;
 
-  window.onFirebaseState = function(data) {
-    if (_firstFirebaseRead) {
-      _firstFirebaseRead = false;
-
-      if (data && (data.goals || data.catalog || data.wallet)) {
-        _applyFirebaseState(data);
-        _doInit(true);
-      } else {
-        localStorage.removeItem('fv4_seeded');
-        _doInit(false);
-        _fbPushFullState();
+    if (!_initDone) {
+      // count how many of the expected nodes have arrived
+      _fbInitialNodeCount = _FB_INIT_NODES.filter(k => k in _fbNodes).length;
+      if (_fbInitialNodeCount >= _FB_INIT_NODES.length) {
+        // all nodes received — init from Firebase
+        const hasData = _fbNodes.goals || _fbNodes.catalog;
+        if (hasData) {
+          _applyFirebaseState(_fbNodes);
+          _doInit(true);
+        } else {
+          localStorage.removeItem('fv4_seeded');
+          _doInit(false);
+          _fbPushFullState();
+        }
       }
     } else {
-      // subsequent updates from PC — apply full state and re-render everything
-      if (!data) return;
-      _applyAndRender(data);
+      // already initialized — apply live update
+      _applyAndRender(_fbNodes);
     }
+  };
+
+  window.onFirebaseSession = function(data) {
+    // mobile owns session — no action needed
+  };
+
+  window.onFirebaseReady = function() {
+    // node listeners handle everything — no action needed here
   };
 
   function _applyFirebaseGoals(rawGoals) {
