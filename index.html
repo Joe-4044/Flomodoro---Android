@@ -2129,12 +2129,17 @@
 
     // ── sync wallet/tickets/catalog on change ────────────────────────────
     window.fbSyncState = function(data) {
-      fbSet('wallet',  data.wallet  ?? null);
-      fbSet('goals',   data.goals   ?? null);
-      fbSet('tickets', data.tickets ?? null);
-      fbSet('catalog', data.catalog ?? null);
-      fbSet('jar',     data.jar     ?? null);
-      fbSet('weekly',  data.weekly  ?? null);
+      window._fbSelfWriting = true;
+      Promise.all([
+        fbSet('wallet',  data.wallet  ?? null),
+        fbSet('goals',   data.goals   ?? null),
+        fbSet('tickets', data.tickets ?? null),
+        fbSet('catalog', data.catalog ?? null),
+        fbSet('jar',     data.jar     ?? null),
+        fbSet('weekly',  data.weekly  ?? null),
+      ]).finally(() => {
+        setTimeout(() => { window._fbSelfWriting = false; }, 2000);
+      });
     };
 
     window.fbPushRedemption = function(redemption) {
@@ -3175,8 +3180,10 @@
   const _fbNodes = {};
   let _fbInitialNodeCount = 0;
   const _FB_INIT_NODES = ['goals', 'jar', 'catalog', 'tickets'];
+  let _fbSelfWriting = false; // true while Android is pushing — ignore echo
 
   window.onFirebaseNodeUpdate = function(key, value) {
+    if (_fbSelfWriting) return;
     _fbNodes[key] = value;
 
     if (!_initDone) {
