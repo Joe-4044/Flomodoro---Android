@@ -638,6 +638,23 @@
     .ticket-code-hint { font-family: var(--mono); font-size: 10px; color: var(--text3); text-align: center; margin-top: 6px; }
     .ticket-redeem-btn { width: 100%; padding: 11px; font-family: var(--mono); font-size: 11px; color: var(--green); background: rgba(106,173,126,0.1); border: 0.5px solid rgba(106,173,126,0.25); border-radius: 9px; letter-spacing: 0.05em; -webkit-tap-highlight-color: transparent; transition: opacity 0.15s; }
     .ticket-redeem-btn:active { opacity: 0.7; }
+    .ticket-unsupported {
+      width: 100%;
+      padding: 11px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text4);
+      background: var(--bg4);
+      border: 0.5px solid var(--border2);
+      border-radius: 9px;
+      letter-spacing: 0.05em;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .ticket-unsupported-icon { color: var(--amber); font-size: 12px; }
     .ticket-history-card { background: var(--bg3); border: 0.5px solid var(--border); border-radius: 12px; padding: 13px 16px; display: flex; align-items: center; gap: 12px; }
     .ticket-history-info { flex: 1; min-width: 0; }
     .ticket-history-title { font-family: var(--mono); font-size: 11px; color: var(--text2); }
@@ -2459,7 +2476,7 @@
     list.innerHTML = goals.map(g => {
       const act    = S.active();
       const isLive = act && String(act.goalId) === String(g.id);
-      const locked = g.locked && !isLive;
+      const locked = (g.locked || isGoalLocked(g.id)) && !isLive;
       const todayKey  = S.today();
       const todaySecs = (g.dailySecs && g.dailySecs[todayKey]) || 0;
 
@@ -2508,7 +2525,7 @@
     // attach long press to each card
     goals.forEach(g => {
       const el = document.getElementById('gc-' + g.id);
-      if (el && !g.locked) attachLongPress(el, g.id);
+      if (el && !g.locked && !isGoalLocked(g.id)) attachLongPress(el, g.id);
     });
   }
 
@@ -2516,7 +2533,7 @@
     const act = S.active();
     if (act) return; // already in session
     const g = S.goalById(goalId);
-    if (!g || g.locked) return;
+    if (!g || g.locked || isGoalLocked(g.id)) return;
     // select this goal for the slider
     _sliderGoalId = goalId;
     setSliderGoal(goalId);
@@ -3172,7 +3189,55 @@
   function sheetAction(action) {
     const gid = _sheetGoalId;
     closeSheet();
-    if (action === 'info')    { setTimeout(() => alert('Goal info — coming soon'), 300); }
+    if (action === 'info') {
+      setTimeout(() => {
+        const g = S.goalById(gid);
+        if (!g) return;
+        const tierColors = { 1:'var(--green)', 2:'var(--blue)', 3:'var(--amber)', 4:'var(--gold)' };
+        const rewardsHtml = [1,2,3,4].map(n => {
+          const type = g['reward'+n+'Type'] || 'ticket';
+          const app  = g['reward'+n+'App']  || '';
+          const dur  = g['reward'+n+'Dur']  || 30;
+          const txt  = g['reward'+n]        || '';
+          const tierLabels = {1:'T1 · MVD', 2:'T2 · AVG', 3:'T3 · BSD', 4:'★ Jackpot'};
+          const val  = type === 'ticket' ? (app ? `${app} · ${dur} min` : 'ticket') : (txt || '—');
+          return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border2);">
+            <span style="font-family:var(--mono);font-size:9px;color:${tierColors[n]};letter-spacing:0.08em;width:72px;flex-shrink:0;">${tierLabels[n]}</span>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text3);flex:1;">${val}</span>
+          </div>`;
+        }).join('');
+
+        const infoHtml = `
+          <div style="padding:14px 20px 20px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+              <div style="width:9px;height:9px;border-radius:50%;background:${g.color||'#6aad7e'};flex-shrink:0;"></div>
+              <span style="font-size:15px;font-weight:600;color:var(--text);">${g.name}</span>
+              <span style="font-family:var(--mono);font-size:9px;color:var(--text4);margin-left:auto;">${g.trackerType||'time'}</span>
+            </div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;color:var(--text4);margin-bottom:8px;">TIERS</div>
+            <div style="background:var(--bg3);border:0.5px solid var(--border2);border-radius:10px;padding:10px 14px;margin-bottom:16px;">
+              <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--text3);">
+                <span style="color:var(--green);">MVD ${g.mvdVal!=null?fmtTierVal(g.mvdVal,g.trackerType||'time'):'—'}</span>
+                <span style="color:var(--blue);">AV ${g.avVal!=null?fmtTierVal(g.avVal,g.trackerType||'time'):'—'}</span>
+                <span style="color:var(--amber);">BSD ${g.bsdVal!=null?fmtTierVal(g.bsdVal,g.trackerType||'time'):'—'}</span>
+              </div>
+            </div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;color:var(--text4);margin-bottom:8px;">REWARDS</div>
+            <div style="border-top:0.5px solid var(--border2);">${rewardsHtml}</div>
+          </div>`;
+
+        // reuse the bottom sheet with custom content
+        document.getElementById('sheet-dot').style.background  = g.color || '#6aad7e';
+        document.getElementById('sheet-name').textContent = g.name + ' — info';
+        document.querySelector('.sheet-actions').innerHTML = infoHtml +
+          `<button class="sheet-action" onclick="closeSheet()">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            Close
+          </button>`;
+        document.getElementById('bottom-sheet-overlay').classList.add('open');
+        document.getElementById('bottom-sheet').classList.add('open');
+      }, 300);
+    }
     if (action === 'edit')    { setTimeout(() => openGoalWizard(gid), 300); }
     if (action === 'reorder') { setTimeout(() => enterReorderMode(), 300); }
     if (action === 'delete') {
@@ -3343,7 +3408,7 @@
 
   function doPunchIn(goalId) {
     const g = S.goalById(goalId);
-    if (!g || g.locked) return;
+    if (!g || g.locked || isGoalLocked(g.id)) return;
     const session = {
       goalId:       g.id,
       goalName:     g.name,
@@ -3550,7 +3615,8 @@
 
       S.ensurePatoFields(g);
       S.syncPatoStreak(g);
-      S.tryEarnPato(g, todaySecs);
+      const patoTierVal = g.trackerType === 'count' ? (act.count || 0) : todaySecs;
+      S.tryEarnPato(g, patoTierVal);
       S.saveGoals(goals);
     }
 
@@ -3667,13 +3733,12 @@
     const pane = document.getElementById('wheel-pane-inner');
     if (!pane) return;
 
-    // pick first normal goal as the wheel goal for now
     const goals = S.goals().filter(g => g.kind !== 'blocker');
     if (!_wheelGoalId && goals.length) _wheelGoalId = goals[0].id;
-    const wState = _wheelGoalId ? S.wheel(_wheelGoalId) : { holding:[] };
+    const wState  = _wheelGoalId ? S.wheel(_wheelGoalId) : { holding:[] };
     const holding = wState.holding || [];
 
-    const availW = pane.clientWidth || 320;
+    const availW    = pane.clientWidth || 320;
     const wheelSize = Math.max(260, Math.min(460, availW - 32));
 
     const hasClips  = holding.length > 0;
@@ -3687,12 +3752,23 @@
       : ceiling===2?'2 matching — Tier 2 ceiling unlocked'
       : 'select 2+ matching clips to raise ceiling';
 
-    const canSpin = hasClips && selCount > 0 && !wheelSpinning;
+    const canSpin   = hasClips && selCount > 0 && !wheelSpinning;
     const spinLabel = !hasClips?'earn clips to spin':selCount===0?'select clips to set ceiling':wheelSpinning?'spinning…':'spin · ceiling '+ceilLabel;
 
+    const goalChips = goals.map(g => {
+      const w = S.wheel(g.id);
+      const clips = (w.holding || []).length;
+      const isActive = String(g.id) === String(_wheelGoalId);
+      return `<button onclick="setWheelGoal('${g.id}')" style="flex-shrink:0;padding:6px 12px;border-radius:20px;font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:${isActive?g.color||'var(--green)':'var(--text3)'};background:${isActive?'var(--bg4)':'var(--bg3)'};border:0.5px solid ${isActive?g.color||'var(--green-border)':'var(--border2)'};-webkit-tap-highlight-color:transparent;white-space:nowrap;">${g.name}${clips?' · '+clips+' clips':''}</button>`;
+    }).join('');
+
+    const curGoalName = goals.find(g=>String(g.id)===String(_wheelGoalId))?.name || '';
+
     pane.innerHTML = `
+      <div style="display:flex;gap:8px;overflow-x:auto;padding:0 0 12px;scrollbar-width:none;">${goalChips}</div>
+
       <div class="wheel-wrap" style="width:${wheelSize}px;height:${wheelSize}px;">
-        <div class="wheel-disc" id="wheel-disc" style="transform:rotate(${wheelRotation}deg);">
+        <div class="wheel-disc" id="wheel-disc" style="transform:rotate(${wheelRotation}deg);transition:none;">
           ${buildWheelSVG(wheelSize)}
         </div>
         <div class="wheel-pointer">
@@ -3709,7 +3785,7 @@
       <button class="spin-btn" onclick="onSpin()" ${canSpin?'':'disabled'}>${spinLabel}</button>
 
       <div class="holding-section">
-        <div class="holding-label">holding area · tap to select</div>
+        <div class="holding-label">holding · ${curGoalName} · tap to select</div>
         <div class="holding-grid" id="holding-grid">
           ${hasClips
             ? holding.map((c,i)=>`<div class="clip-dot${_selectedClipIndices.has(i)?' selected':''}" style="background:${c.hex};box-shadow:${_selectedClipIndices.has(i)?'0 0 8px '+c.hex:'none'};" onclick="toggleClip(${i})">${_selectedClipIndices.has(i)?'✓':''}</div>`).join('')
@@ -3724,6 +3800,13 @@
       </div>
     `;
   }
+
+  function setWheelGoal(goalId) {
+    _wheelGoalId = goalId;
+    _selectedClipIndices = new Set();
+    renderWheelPane();
+  }
+
 
   function toggleClip(i) {
     if (_selectedClipIndices.has(i)) _selectedClipIndices.delete(i); else _selectedClipIndices.add(i);
@@ -3775,13 +3858,18 @@
     selArr.forEach(i => { wState.holding.splice(i, 1); });
     _selectedClipIndices = new Set();
     S.saveWheel(_wheelGoalId, wState);
+    renderWheelPane(); // recreates disc element with transition:none
 
-    const disc = document.getElementById('wheel-disc');
-    if (disc) {
-      disc.style.transition = 'transform 4.2s cubic-bezier(0.17,0.67,0.12,0.99)';
-      disc.style.transform  = `rotate(${wheelRotation}deg)`;
-    }
-    renderWheelPane();
+    // apply transition on next frame after disc is in DOM
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const disc = document.getElementById('wheel-disc');
+        if (disc) {
+          disc.style.transition = 'transform 4.2s cubic-bezier(0.17,0.67,0.12,0.99)';
+          disc.style.transform  = `rotate(${wheelRotation}deg)`;
+        }
+      });
+    });
 
     setTimeout(() => {
       wheelSpinning = false;
@@ -3806,6 +3894,7 @@
             tier:         { t1:'T1', t2:'T2', t3:'T3', jackpot:'T3' }[outcome.id],
             device:       'mobile',
             status:       'active',
+            pcOnly:       isAppPcOnly(rewardApp),
             earnedAt:     Date.now(),
             expiresAt:    Date.now() + 24*3600*1000,
           };
@@ -3830,6 +3919,10 @@
            <div style="font-family:var(--mono);font-size:9px;color:var(--text4);letter-spacing:0.1em;margin-bottom:8px;">TICKET GENERATED</div>
            <div style="font-family:var(--mono);font-size:32px;font-weight:700;letter-spacing:0.2em;color:var(--text);">${ticket.code}</div>
            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px;">${ticket.rewardApp} · ${ticket.durationMins} min · expires in 24h</div>
+           ${ticket.pcOnly || isAppPcOnly(ticket.rewardApp)
+             ? `<div style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--amber);">⚠ Not supported on Android · sync up to PC to redeem</div>`
+             : ''
+           }
          </div>`
       : `<div style="margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--text4);">set a reward in goal settings to generate tickets</div>`;
     const modal = document.createElement('div');
@@ -4165,7 +4258,10 @@
           </div>
           <div class="ticket-code" onclick="copyCode('${t.code}')">${t.code}</div>
           <div class="ticket-code-hint">Expires in ${fmtTimeRemaining(t.expiresAt)} · tap to copy</div>
-          <button class="ticket-redeem-btn" onclick="redeemTicket('${t.code}')">redeem on PC →</button>
+          ${t.pcOnly || isAppPcOnly(t.rewardApp)
+            ? `<div class="ticket-unsupported"><span class="ticket-unsupported-icon">⚠</span> Not supported on Android · PC only</div>`
+            : `<button class="ticket-redeem-btn" onclick="redeemTicket('${t.code}')">redeem on PC →</button>`
+          }
         </div>`).join('')}
 
       ${shownHistory.length ? `
@@ -4269,7 +4365,14 @@
     `;
   }
 
-  // ── PATO REAL WORLD PRICING ───────────────────────────────────────────
+  // PC-only reward apps — cannot be redeemed on Android
+  const PC_ONLY_APPS = ['Miruro', 'miruro'];
+
+  function isAppPcOnly(appName) {
+    if (!appName) return false;
+    return PC_ONLY_APPS.some(a => appName.toLowerCase() === a.toLowerCase())
+      || appName.toLowerCase().includes('miruro');
+  }
   function hashDateStr(s) {
     let h = 2166136261;
     for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
