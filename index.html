@@ -229,8 +229,16 @@
       box-shadow: 0 0 0 0.5px #4a8c5c inset;
     }
     .goalcard.selected {
-      border-color: var(--green-border);
-      background: var(--green-bg);
+      border-color: var(--goal-color, #6aad7e);
+      background: var(--bg3);
+      box-shadow: inset 0 0 0 0.5px var(--goal-color, #6aad7e), 0 0 0 1px color-mix(in srgb, var(--goal-color, #6aad7e) 12%, transparent);
+    }
+    /* fallback for browsers without color-mix */
+    @supports not (background: color-mix(in srgb, red 50%, blue)) {
+      .goalcard.selected {
+        border-color: var(--goal-color, #6aad7e);
+        background: rgba(0,0,0,0.15);
+      }
     }
     .goalcard.locked { opacity: 0.42; pointer-events: none; }
 
@@ -2486,20 +2494,20 @@
         : Math.min(100, todaySecs / 3600 * 33);
 
       // tier label
-      let tierLabel = '—';
+      let tierLabel = '';
       let tierColor = 'var(--text4)';
-      if (hasTiers) {
+      if (hasTiers && g.trackerType !== 'count') {
+        // count goals: tier only meaningful during active session
         if      (todaySecs >= g.bsdVal) { tierLabel = 'BSD'; tierColor = 'var(--blue)';  }
         else if (todaySecs >= g.avVal)  { tierLabel = 'AV';  tierColor = 'var(--amber)'; }
         else if (todaySecs >= g.mvdVal) { tierLabel = 'MVD'; tierColor = 'var(--green)'; }
-        else                            { tierLabel = '—';   tierColor = 'var(--text4)'; }
       }
 
       // tick positions (MVD and AV as % of BSD)
       const mvdTick = hasTiers ? Math.min(99, (g.mvdVal / g.bsdVal) * 100) : 33;
       const avTick  = hasTiers ? Math.min(99, (g.avVal  / g.bsdVal) * 100) : 66;
       return `
-        <div class="goalcard${isLive?' live':''}${locked?' locked':''}" id="gc-${g.id}" onclick="onGoalTap(${g.id})" draggable="true">
+        <div class="goalcard${isLive?' live':''}${locked?' locked':''}" id="gc-${g.id}" onclick="onGoalTap(${g.id})" draggable="true" style="--goal-color:${g.color||'#6aad7e'}">
           <div class="gc-top">
             <span class="gc-drag-handle">⠿</span>
             <div class="gc-dot" style="background:${g.color||'#6aad7e'};"></div>
@@ -2516,7 +2524,12 @@
           <div class="gc-scale"><span>MVD</span><span>AV</span><span>BSD</span></div>
           <div class="gc-meta">
             <span>${isLive ? '<span style="color:var(--green);">● live</span>' : fmtHrMin(todaySecs)+' today'}</span>
-            <span class="gc-tier-pill" style="color:${locked?'var(--text4)':tierColor};border-color:${locked?'var(--border2)':tierColor+'44'};background:${locked?'var(--bg4)':tierColor+'11'};">${locked?'locked':tierLabel}</span>
+            ${locked
+              ? `<span class="gc-tier-pill">locked</span>`
+              : tierLabel
+                ? `<span class="gc-tier-pill" style="color:${tierColor};border-color:${tierColor}44;background:${tierColor}11;">${tierLabel}</span>`
+                : `<span class="gc-tier-pill" style="color:var(--text4);border-color:transparent;background:transparent;">—</span>`
+            }
           </div>
         </div>`;
     }).join('');
@@ -3389,16 +3402,15 @@
 
   function setSliderGoal(goalId) {
     _sliderGoalId = goalId;
-    // update slider appearance
     const slider = document.getElementById('cw-slider');
     const hint   = slider?.querySelector('.cw-slider-hint');
     if (hint) {
       if (goalId) {
         const g = S.goalById(goalId);
-        hint.textContent = g ? 'swipe to punch in — ' + g.name + ' →' : 'swipe to punch in →';
-        hint.style.opacity = '0.8';
+        hint.textContent = g ? g.name + ' →' : '→';
+        hint.style.opacity = '0.9';
       } else {
-        hint.textContent = 'select a goal below';
+        hint.textContent = 'swipe to punch in →';
         hint.style.opacity = '0.4';
       }
     }
