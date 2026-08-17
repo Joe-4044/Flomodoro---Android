@@ -2496,7 +2496,7 @@
       // tier label
       let tierLabel = '';
       let tierColor = 'var(--text4)';
-      if (hasTiers && g.trackerType !== 'count') {
+      if (hasTiers && !isCountGoal(g)) {
         // count goals: tier only meaningful during active session
         if      (todaySecs >= g.bsdVal) { tierLabel = 'BSD'; tierColor = 'var(--blue)';  }
         else if (todaySecs >= g.avVal)  { tierLabel = 'AV';  tierColor = 'var(--amber)'; }
@@ -3310,7 +3310,7 @@
       <div class="sum-goal">${g ? g.name : ''}</div>
       <div class="sum-receipt">
         <div class="sum-rrow"><span>Time elapsed</span><b>${fmtHrMin(durationSecs)}</b></div>
-        ${g && g.trackerType === 'count' ? `<div class="sum-rrow"><span>Final count</span><b>${count}</b></div>` : ''}
+        ${g && isCountGoal(g) ? `<div class="sum-rrow"><span>Final count</span><b>${count}</b></div>` : ''}
         <div class="sum-rrow"><span>Tier reached</span><b style="color:${tierColor};">${tierLabel.toUpperCase()}</b></div>
         <div class="sum-rrow"><span>Clips earned</span><div class="sum-clips">${clipsHtml}</div></div>
       </div>
@@ -3492,7 +3492,7 @@
       const todayKey  = S.today();
       const todaySecs = ((g.dailySecs && g.dailySecs[todayKey]) || 0) + focusSecs;
       const hasTiers  = g.mvdVal && g.bsdVal;
-      const tierVal   = g.trackerType === 'count' ? (act.count || 0) : todaySecs;
+      const tierVal   = isCountGoal(g) ? (act.count || 0) : todaySecs;
       const pct       = hasTiers ? Math.min(100, (tierVal / g.bsdVal) * 100) : Math.min(100, todaySecs / 3600 * 33);
       const fill = document.getElementById('cw-tiertrack-fill');
       if (fill) { fill.style.width = pct + '%'; fill.style.background = g.color || '#6aad7e'; }
@@ -3518,7 +3518,7 @@
     // count tap zone — show for count-type goals while punched in
     const tapWrap = document.getElementById('cw-tap-wrap');
     if (tapWrap) {
-      const isCount = g && g.trackerType === 'count';
+      const isCount = g && isCountGoal(g);
       tapWrap.classList.toggle('visible', !!isCount);
       if (isCount) {
         _tapCount = act.count || 0;
@@ -3589,7 +3589,7 @@
       g.totalSecs           = (g.totalSecs || 0) + focusSecs;
 
       const todaySecs = g.dailySecs[todayKey];
-      const tierVal   = g.trackerType === 'count' ? (act.count || 0) : todaySecs;
+      const tierVal   = isCountGoal(g) ? (act.count || 0) : todaySecs;
       if (g.mvdVal && g.bsdVal) {
         if      (tierVal >= g.bsdVal) tierResult = { tier:'Best Day',          clips: g.bsdClips || 3 };
         else if (tierVal >= g.avVal)  tierResult = { tier:'Average Day',        clips: g.avClips  || 2 };
@@ -3626,7 +3626,7 @@
 
       S.ensurePatoFields(g);
       S.syncPatoStreak(g);
-      const patoTierVal = g.trackerType === 'count' ? (act.count || 0) : todaySecs;
+      const patoTierVal = isCountGoal(g) ? (act.count || 0) : todaySecs;
       S.tryEarnPato(g, patoTierVal);
       S.saveGoals(goals);
     }
@@ -4423,6 +4423,17 @@
   }
 
   // PC-only reward apps — cannot be redeemed on Android
+  // ── COUNT GOAL DETECTION ──────────────────────────────────────────────
+  function isCountGoal(g) {
+    if (!g) return false;
+    if (g.trackerType === 'count') return true;
+    // fallback: mvdVal looks like a count (small integer, not divisible by 60)
+    if (!g.trackerType && g.mvdVal && g.mvdVal <= 500 && Number.isInteger(g.mvdVal)) {
+      return !(g.mvdVal >= 60 && g.mvdVal % 60 === 0);
+    }
+    return false;
+  }
+
   const PC_ONLY_APPS = ['Miruro', 'miruro'];
 
   function isAppPcOnly(appName) {
