@@ -3726,15 +3726,54 @@
   let wheelSpinning   = false;
   let wheelRotation   = 0;
   let _selectedClipIndices = new Set();
-  let _wheelGoalId    = null; // which goal's wheel we're viewing
+
+  // ── WHEEL PANE — two states: goal list or wheel view ─────────────────
+  let _wheelGoalId = null;
 
   function renderWheelPane() {
     const pane = document.getElementById('wheel-pane-inner');
     if (!pane) return;
+    if (_wheelGoalId) renderWheelView(pane);
+    else              renderWheelGoalList(pane);
+  }
 
+  function renderWheelGoalList(pane) {
     const goals = S.goals().filter(g => g.kind !== 'blocker');
-    if (!_wheelGoalId && goals.length) _wheelGoalId = goals[0].id;
-    const wState  = _wheelGoalId ? S.wheel(_wheelGoalId) : { holding:[] };
+    if (!goals.length) {
+      pane.innerHTML = '<div class="list-empty">no goals yet</div>';
+      return;
+    }
+    pane.innerHTML = goals.map(g => {
+      const w     = S.wheel(g.id);
+      const clips = (w.holding || []).length;
+      const colors = (w.holding || []).slice(0, 8).map(c =>
+        `<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${c.hex};margin-right:2px;"></span>`
+      ).join('');
+      return `
+        <div onclick="setWheelGoal('${g.id}')" style="
+          display:flex;align-items:center;gap:12px;
+          padding:14px 16px;margin:0 12px 8px;
+          background:var(--bg3);border:0.5px solid var(--border2);
+          border-radius:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+        ">
+          <div style="width:9px;height:9px;border-radius:50%;background:${g.color||'#6aad7e'};flex-shrink:0;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">${g.name}</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text4);">
+              ${clips ? colors + ' ' + clips + ' clip' + (clips!==1?'s':'') + ' in holding' : 'no clips — earn some first'}
+            </div>
+          </div>
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text4);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>`;
+    }).join('');
+  }
+
+  function renderWheelView(pane) {
+    const goals   = S.goals().filter(g => g.kind !== 'blocker');
+    const g       = goals.find(go => String(go.id) === String(_wheelGoalId));
+    const wState  = S.wheel(_wheelGoalId);
     const holding = wState.holding || [];
 
     const availW    = pane.clientWidth || 320;
@@ -3754,55 +3793,53 @@
     const canSpin   = hasClips && selCount > 0 && !wheelSpinning;
     const spinLabel = !hasClips?'earn clips to spin':selCount===0?'select clips to set ceiling':wheelSpinning?'spinning…':'spin · ceiling '+ceilLabel;
 
-    const goalOptions = goals.map(g => {
-      const w = S.wheel(g.id);
-      const clips = (w.holding || []).length;
-      const isActive = String(g.id) === String(_wheelGoalId);
-      return `<option value="${g.id}" ${isActive?'selected':''}>${g.name}${clips?' ('+clips+' clips)':''}`;
-    }).join('');
-
-    const curGoalName = goals.find(g=>String(g.id)===String(_wheelGoalId))?.name || '';
-
     pane.innerHTML = `
-      <div style="padding:0 0 12px;">
-        <select onchange="setWheelGoal(this.value)" style="
-          width:100%; background:var(--bg3); border:0.5px solid var(--border);
-          border-radius:10px; padding:11px 14px; font-family:var(--mono);
-          font-size:12px; color:var(--text); outline:none; appearance:none;
-          box-sizing:border-box;
-        ">${goalOptions}</select>
-      </div>
-
-      <div class="wheel-wrap" style="width:${wheelSize}px;height:${wheelSize}px;">
-        <div class="wheel-disc" id="wheel-disc" style="transform:rotate(${wheelRotation}deg);transition:none;">
-          ${buildWheelSVG(wheelSize)}
-        </div>
-        <div class="wheel-pointer">
-          <svg width="${wheelSize}" height="${wheelSize}" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="130,8 124,0 136,0" fill="#d4d4d2" opacity="0.92"/>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;border-bottom:0.5px solid var(--border2);margin-bottom:4px;">
+        <button onclick="setWheelGoal(null)" style="
+          width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+          border-radius:8px;color:var(--text3);-webkit-tap-highlight-color:transparent;
+          background:none;border:none;cursor:pointer;flex-shrink:0;
+        ">
+          <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;">
+            <polyline points="15 18 9 12 15 6"/>
           </svg>
+        </button>
+        <div style="width:9px;height:9px;border-radius:50%;background:${g?g.color||'#6aad7e':'#555'};flex-shrink:0;"></div>
+        <span style="font-size:14px;font-weight:600;color:var(--text);">${g?g.name:'Goal'}</span>
+      </div>
+
+      <div class="wheel-pane">
+        <div class="wheel-wrap" style="width:${wheelSize}px;height:${wheelSize}px;">
+          <div class="wheel-disc" id="wheel-disc" style="transform:rotate(${wheelRotation}deg);">
+            ${buildWheelSVG(wheelSize)}
+          </div>
+          <div class="wheel-pointer">
+            <svg width="${wheelSize}" height="${wheelSize}" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="130,8 124,0 136,0" fill="#d4d4d2" opacity="0.92"/>
+            </svg>
+          </div>
         </div>
-      </div>
 
-      <div class="wheel-legend">
-        ${WHEEL_SEGMENTS.map(s=>`<div class="wheel-legend-item"><div class="wheel-legend-dot" style="background:${s.color};"></div>${s.label}</div>`).join('')}
-      </div>
-
-      <button class="spin-btn" onclick="onSpin()" ${canSpin?'':'disabled'}>${spinLabel}</button>
-
-      <div class="holding-section">
-        <div class="holding-label">holding · ${curGoalName} · tap to select</div>
-        <div class="holding-grid" id="holding-grid">
-          ${hasClips
-            ? holding.map((c,i)=>`<div class="clip-dot${_selectedClipIndices.has(i)?' selected':''}" style="background:${c.hex};box-shadow:${_selectedClipIndices.has(i)?'0 0 8px '+c.hex:'none'};" onclick="toggleClip(${i})">${_selectedClipIndices.has(i)?'✓':''}</div>`).join('')
-            : '<span style="font-family:var(--mono);font-size:10px;color:var(--text4);">no clips yet — complete a session to earn</span>'
-          }
+        <div class="wheel-legend">
+          ${WHEEL_SEGMENTS.map(s=>`<div class="wheel-legend-item"><div class="wheel-legend-dot" style="background:${s.color};"></div>${s.label}</div>`).join('')}
         </div>
-      </div>
 
-      <div class="ceil-badge">
-        ceiling · <b style="color:${ceilColor}">${ceilLabel}</b>
-        <span class="ceil-explain">${ceilExplain}</span>
+        <button class="spin-btn" onclick="onSpin()" ${canSpin?'':'disabled'}>${spinLabel}</button>
+
+        <div class="holding-section">
+          <div class="holding-label">holding · ${g?g.name:''} · tap to select</div>
+          <div class="holding-grid" id="holding-grid">
+            ${hasClips
+              ? holding.map((c,i)=>`<div class="clip-dot${_selectedClipIndices.has(i)?' selected':''}" style="background:${c.hex};box-shadow:${_selectedClipIndices.has(i)?'0 0 8px '+c.hex:'none'};" onclick="toggleClip(${i})">${_selectedClipIndices.has(i)?'✓':''}</div>`).join('')
+              : '<span style="font-family:var(--mono);font-size:10px;color:var(--text4);">no clips yet — complete a session to earn</span>'
+            }
+          </div>
+        </div>
+
+        <div class="ceil-badge">
+          ceiling · <b style="color:${ceilColor}">${ceilLabel}</b>
+          <span class="ceil-explain">${ceilExplain}</span>
+        </div>
       </div>
     `;
   }
