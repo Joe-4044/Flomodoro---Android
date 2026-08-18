@@ -2439,10 +2439,26 @@
       if (changed) saveGoals(gs);
     }
 
+    function todayValue(gid) {
+      const t   = today();
+      const act = active();
+      const gs  = goals();
+      const g   = gs.find(x => String(x.id) === String(gid));
+      const entries = (load(KEYS.log) || []).filter(e => String(e.goalId) === String(gid) && e.date === t);
+      let total = 0;
+      entries.forEach(e => {
+        total += (e.trackerType === 'count' ? (e.count || 0) : (e.durationSecs || 0));
+      });
+      if (act && String(act.goalId) === String(gid)) {
+        total += (g && g.trackerType === 'count') ? (act.count || 0) : focusElapsedSecs(act);
+      }
+      return total;
+    }
+
     return { KEYS, CLIP_COLORS, goals, active, log, catalog, tickets, redemptions, wheel, jar,
              saveGoals, saveActive, saveLog, saveCatalog, saveTickets, saveJar, saveWheel,
              goalById, drawClips, addToHolding, addToJar, addRedemption,
-             totalPato, spendPato, today, focusElapsedSecs, ensureSeed,
+             totalPato, spendPato, today, focusElapsedSecs, ensureSeed, todayValue,
              ensurePatoFields, syncPatoStreak, tryEarnPato, processPato };
   })();
 
@@ -3457,17 +3473,18 @@
     // update the live goal card tier bar
     const g = act ? S.goalById(act.goalId) : null;
     if (g && isCountGoal(g)) {
-      const hasTiers = g.mvdVal && g.bsdVal;
+      const hasTiers   = g.mvdVal && g.bsdVal;
       if (hasTiers) {
-        const pct      = Math.min(100, (_tapCount / g.bsdVal) * 100);
-        const barFill  = document.querySelector(`#gc-${g.id} .gc-bar-fill`);
-        const tierPill = document.querySelector(`#gc-${g.id} .gc-tier-pill`);
+        const cumulative = S.todayValue(act.goalId); // includes previous sessions today
+        const pct        = Math.min(100, (cumulative / g.bsdVal) * 100);
+        const barFill    = document.querySelector(`#gc-${g.id} .gc-bar-fill`);
+        const tierPill   = document.querySelector(`#gc-${g.id} .gc-tier-pill`);
         if (barFill) barFill.style.width = pct + '%';
         if (tierPill) {
           let label = '', color = 'var(--text4)';
-          if      (_tapCount >= g.bsdVal) { label = 'BSD'; color = 'var(--blue)'; }
-          else if (_tapCount >= g.avVal)  { label = 'AV';  color = 'var(--amber)'; }
-          else if (_tapCount >= g.mvdVal) { label = 'MVD'; color = 'var(--green)'; }
+          if      (cumulative >= g.bsdVal) { label = 'BSD'; color = 'var(--blue)'; }
+          else if (cumulative >= g.avVal)  { label = 'AV';  color = 'var(--amber)'; }
+          else if (cumulative >= g.mvdVal) { label = 'MVD'; color = 'var(--green)'; }
           tierPill.textContent = label || '—';
           tierPill.style.color = label ? color : 'var(--text4)';
           tierPill.style.borderColor = label ? color + '44' : 'transparent';
@@ -3630,7 +3647,7 @@
       const todayKey  = S.today();
       const todaySecs = ((g.dailySecs && g.dailySecs[todayKey]) || 0) + focusSecs;
       const hasTiers  = g.mvdVal && g.bsdVal;
-      const tierVal   = isCountGoal(g) ? (act.count || 0) : todaySecs;
+      const tierVal   = isCountGoal(g) ? S.todayValue(act.goalId) : todaySecs;
       const pct       = hasTiers ? Math.min(100, (tierVal / g.bsdVal) * 100) : Math.min(100, todaySecs / 3600 * 33);
       const fill = document.getElementById('cw-tiertrack-fill');
       if (fill) { fill.style.width = pct + '%'; fill.style.background = g.color || '#6aad7e'; }
@@ -3727,7 +3744,7 @@
       g.totalSecs           = (g.totalSecs || 0) + focusSecs;
 
       const todaySecs = g.dailySecs[todayKey];
-      const tierVal   = isCountGoal(g) ? (act.count || 0) : todaySecs;
+      const tierVal   = isCountGoal(g) ? S.todayValue(act.goalId) : todaySecs;
       if (g.mvdVal && g.bsdVal) {
         if      (tierVal >= g.bsdVal) tierResult = { tier:'Best Day',          clips: g.bsdClips || 3 };
         else if (tierVal >= g.avVal)  tierResult = { tier:'Average Day',        clips: g.avClips  || 2 };
@@ -3764,7 +3781,7 @@
 
       S.ensurePatoFields(g);
       S.syncPatoStreak(g);
-      const patoTierVal = isCountGoal(g) ? (act.count || 0) : todaySecs;
+      const patoTierVal = isCountGoal(g) ? S.todayValue(act.goalId) : todaySecs;
       S.tryEarnPato(g, patoTierVal);
       S.saveGoals(goals);
     }
