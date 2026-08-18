@@ -1247,102 +1247,147 @@
     .wiz-save-btn:active { opacity: 0.7; }
 
     /* ── HABIT BLOCKER UI ──────────────────────────────────────────────── */
-    .blocker-pane { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .blocker-pane { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 
     .hb-card {
-      background: var(--bg3);
+      background: var(--bg2);
       border: 0.5px solid var(--border2);
-      border-left: 3px solid var(--amber);
-      border-radius: 12px;
+      border-radius: 14px;
       overflow: hidden;
     }
-    .hb-card.cleared { border-left-color: var(--green); }
-
     .hb-header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 13px 14px 10px;
+      justify-content: space-between;
+      padding: 13px 15px 11px;
+      border-bottom: 0.5px solid var(--border2);
+      background: var(--bg3);
     }
-    .hb-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-    .hb-name {
-      flex: 1;
-      font-size: 14px;
-      font-weight: 600;
+    .hb-header-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .hb-pip {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--hb-accent, #cd8a3a);
+      box-shadow: 0 0 7px var(--hb-accent, #cd8a3a);
+      flex-shrink: 0;
+    }
+    .hb-title {
+      font-size: 13px;
+      font-weight: 700;
       color: var(--text);
+      letter-spacing: -0.01em;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .hb-status-pill {
-      font-family: var(--mono);
-      font-size: 8px;
-      letter-spacing: 0.1em;
-      padding: 3px 8px;
-      border-radius: 20px;
-      flex-shrink: 0;
-    }
 
-    .hb-bar {
-      height: 3px;
+    .hb-progress-track {
+      height: 2px;
       background: var(--bg4);
-      margin: 0 14px 10px;
-      border-radius: 2px;
-      overflow: hidden;
+      position: relative;
     }
-    .hb-bar-fill { height: 100%; background: var(--amber); border-radius: 2px; transition: width 0.3s; }
-    .hb-card.cleared .hb-bar-fill { background: var(--green); }
+    .hb-progress-fill {
+      height: 100%;
+      background: var(--hb-accent, #cd8a3a);
+      box-shadow: 0 0 6px var(--hb-accent, #cd8a3a);
+      transition: width 0.4s cubic-bezier(.4,0,.2,1);
+    }
 
-    .hb-subtasks { padding: 0 14px 10px; display: flex; flex-direction: column; gap: 6px; }
-    .hb-subtask {
+    .hb-tasks { padding: 6px 0; }
+    .hb-task-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--text2);
-      padding: 4px 0;
+      gap: 12px;
+      padding: 11px 15px;
       cursor: pointer;
+      transition: background 0.1s;
       -webkit-tap-highlight-color: transparent;
     }
-    .hb-subtask.done { color: var(--text4); text-decoration: line-through; }
-    .hb-check {
+    .hb-task-row:active { background: var(--bg3); }
+    .hb-task-check {
       width: 18px; height: 18px;
-      border-radius: 5px;
       border: 1.5px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
+      border-radius: 5px;
       flex-shrink: 0;
-      font-size: 11px;
-      color: var(--green);
-      background: transparent;
-      transition: background 0.15s, border-color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, background 0.2s;
     }
-    .hb-subtask.done .hb-check { background: var(--green-bg); border-color: var(--green-border); }
+    .hb-task-row.done .hb-task-check {
+      border-color: var(--hb-accent, #cd8a3a);
+      background: var(--hb-accent, #cd8a3a);
+    }
+    .hb-task-check svg { opacity: 0; transform: scale(0.6); transition: opacity 0.15s, transform 0.2s cubic-bezier(.4,0,.2,1); }
+    .hb-task-row.done .hb-task-check svg { opacity: 1; transform: scale(1); }
+    .hb-task-label {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text3);
+      text-decoration: line-through;
+      text-decoration-color: transparent;
+      transition: color 0.2s, text-decoration-color 0.2s;
+    }
+    .hb-task-row.done .hb-task-label { color: var(--text4); text-decoration-color: var(--text4); }
 
-    .hb-footer {
-      padding: 10px 14px 12px;
-      border-top: 0.5px solid var(--border2);
+    .hb-divider { height: 0.5px; background: var(--border2); margin: 0 15px; }
+
+    .hb-stat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 15px 10px;
+    }
+    .hb-stat-count { display: flex; align-items: baseline; gap: 4px; }
+    .hb-stat-num { font-size: 21px; font-weight: 700; color: var(--text); letter-spacing: -0.03em; line-height: 1; transition: color 0.3s; }
+    .hb-stat-num.state-ok { color: var(--green); }
+    .hb-stat-denom { font-family: var(--mono); font-size: 11px; color: var(--text4); }
+    .hb-stat-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase; }
+    .hb-stat-label.state-neutral { color: var(--text4); }
+    .hb-stat-label.state-armed { color: var(--hb-accent, #cd8a3a); }
+    .hb-stat-label.state-ok { color: var(--green); }
+
+    .hb-banner {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--green-bg);
+      border: 0.5px solid var(--green-border);
+      border-radius: 8px;
+      padding: 0 13px;
+      margin: 0 15px 0;
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: opacity 0.4s, max-height 0.4s, padding 0.4s, margin 0.4s;
+    }
+    .hb-banner.show { opacity: 1; max-height: 50px; padding: 8px 13px; margin: 0 15px 11px; }
+    .hb-banner-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .hb-banner-text { font-family: var(--mono); font-size: 10px; color: var(--green); letter-spacing: 0.02em; }
+
+    .hb-footer { border-top: 0.5px solid var(--border2); padding: 11px 15px 13px; background: var(--bg3); }
+    .hb-footer-label { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text4); margin-bottom: 8px; }
+    .hb-locked-list { display: flex; flex-wrap: wrap; gap: 5px; }
+    .hb-locked-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       font-family: var(--mono);
       font-size: 9px;
       color: var(--text4);
-      letter-spacing: 0.06em;
+      border: 0.5px solid var(--border2);
+      border-radius: 5px;
+      padding: 4px 8px;
+      background: var(--bg4);
+      transition: color 0.4s, border-color 0.4s, background 0.4s;
     }
-    .hb-locks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-    .hb-lock-chip {
-      padding: 3px 8px;
-      border-radius: 20px;
-      font-family: var(--mono);
-      font-size: 8px;
-      letter-spacing: 0.06em;
-    }
+    .hb-locked-chip.unlocked { color: var(--green); border-color: var(--green-border); background: var(--green-bg); }
+    .hb-lock-icon { transition: opacity 0.4s; display: flex; align-items: center; }
+    .hb-locked-chip.unlocked .hb-lock-icon { opacity: 0; width: 0; overflow: hidden; }
+    .hb-unlock-icon { opacity: 0; width: 0; overflow: hidden; transition: opacity 0.4s; display: flex; align-items: center; }
+    .hb-locked-chip.unlocked .hb-unlock-icon { opacity: 1; width: auto; }
 
-    .hb-empty {
-      padding: 48px 20px;
-      text-align: center;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text4);
-      letter-spacing: 0.05em;
-    }
+    .hb-empty { padding: 48px 20px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text4); letter-spacing: 0.05em; }
 
     /* ── OFFLINE BANNER ────────────────────────────────────────────────── */
     #offline-banner {
@@ -2230,7 +2275,7 @@
     function saveJar(v)            { save(KEYS.jar, v); }
     function saveWheel(gid, v)     { const w = load(KEYS.wheel)||{}; w[gid]=v; save(KEYS.wheel, w); }
 
-    function goalById(id) { return goals().find(g => String(g.id)===String(id)) || null; }
+    function goalById(id) { return goals().find(g => String(g.id)===String(id)); }
 
     function randomClip() {
       const pool = [...CLIP_COLORS.slice(0,6),...CLIP_COLORS.slice(0,6),...CLIP_COLORS.slice(0,6),
@@ -2424,9 +2469,41 @@
 
   function importSyncState(syncState) {
     if (syncState.goals) {
+      const localGoals = S.goals();
       const goalsArr = Array.isArray(syncState.goals)
         ? syncState.goals
-        : Object.entries(syncState.goals).map(([id, g]) => ({ id: Number(id)||id, ...g }));
+        : Object.entries(syncState.goals).map(([id, g]) => {
+            const local = localGoals.find(e => String(e.id) === String(id));
+            if (g.kind === 'blocker') {
+              // blockers: always prefer local state — Android owns completion/bypass state
+              // only take structural fields from PC (name, color, subtask labels, locks, startsBlockingAt)
+              return {
+                id:               Number(id) || id,
+                kind:             'blocker',
+                name:             g.name,
+                color:            g.color || '#cd8a3a',
+                locks:            g.locks || [],
+                startsBlockingAt: g.startsBlockingAt || '21:00',
+                // local state wins for these:
+                subtasks:         local?.subtasks?.length ? local.subtasks : (g.subtasks || []),
+                lastCompletedAt:  local?.lastCompletedAt != null
+                                    ? local.lastCompletedAt
+                                    : (g.lastCompletedAt || null),
+              };
+            }
+            // normal goals: PC is the source of truth for structure, preserve local session data
+            return {
+              id: Number(id) || id,
+              ...g,
+              // preserve local pato/session data if it's newer
+              patoWallet:         local?.patoWallet         ?? g.patoWallet         ?? 0,
+              patoLastEarnedDate: local?.patoLastEarnedDate ?? g.patoLastEarnedDate ?? null,
+              patoDayInCycle:     local?.patoDayInCycle     ?? g.patoDayInCycle     ?? 1,
+              patoMultiplier:     local?.patoMultiplier     ?? g.patoMultiplier     ?? 1,
+              dailySecs:          local?.dailySecs          ?? g.dailySecs          ?? {},
+              totalSecs:          Math.max(local?.totalSecs || 0, g.totalSecs || 0),
+            };
+          });
       S.saveGoals(goalsArr);
     }
     if (syncState.catalog) {
@@ -2487,10 +2564,11 @@
       const todayKey  = S.today();
       const todaySecs = (g.dailySecs && g.dailySecs[todayKey]) || 0;
 
-      // tier bar — progress toward BSD using real thresholds if available
+      // tier bar — for count goals show 0 between sessions (count resets each session)
       const hasTiers = g.mvdVal && g.bsdVal;
+      const barVal   = isCountGoal(g) ? 0 : todaySecs;
       const pct      = hasTiers
-        ? Math.min(100, (todaySecs / g.bsdVal) * 100)
+        ? Math.min(100, (barVal / g.bsdVal) * 100)
         : Math.min(100, todaySecs / 3600 * 33);
 
       // tier label
@@ -3221,10 +3299,16 @@
 
         const infoHtml = `
           <div style="padding:14px 20px 20px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
-              <div style="width:9px;height:9px;border-radius:50%;background:${g.color||'#6aad7e'};flex-shrink:0;"></div>
-              <span style="font-size:15px;font-weight:600;color:var(--text);">${g.name}</span>
-              <span style="font-family:var(--mono);font-size:9px;color:var(--text4);margin-left:auto;">${g.trackerType||'time'}</span>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <button onclick="openSheet(${g.id})" style="display:flex;align-items:center;gap:6px;color:var(--text3);background:none;border:none;font-family:var(--mono);font-size:11px;-webkit-tap-highlight-color:transparent;cursor:pointer;padding:0;">
+                <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="15 18 9 12 15 6"/></svg>
+                back
+              </button>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:8px;height:8px;border-radius:50%;background:${g.color||'#6aad7e'};"></div>
+                <span style="font-size:14px;font-weight:600;color:var(--text);">${g.name}</span>
+                <span style="font-family:var(--mono);font-size:9px;color:var(--text4);">${g.trackerType||'time'}</span>
+              </div>
             </div>
             <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;color:var(--text4);margin-bottom:8px;">TIERS</div>
             <div style="background:var(--bg3);border:0.5px solid var(--border2);border-radius:10px;padding:10px 14px;margin-bottom:16px;">
@@ -3241,11 +3325,7 @@
         // reuse the bottom sheet with custom content
         document.getElementById('sheet-dot').style.background  = g.color || '#6aad7e';
         document.getElementById('sheet-name').textContent = g.name + ' — info';
-        document.querySelector('.sheet-actions').innerHTML = infoHtml +
-          `<button class="sheet-action" onclick="closeSheet()">
-            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-            Close
-          </button>`;
+        document.querySelector('.sheet-actions').innerHTML = infoHtml;
         document.getElementById('bottom-sheet-overlay').classList.add('open');
         document.getElementById('bottom-sheet').classList.add('open');
       }, 300);
@@ -3507,11 +3587,11 @@
       // tier hint
       const hint = document.getElementById('cw-tier-hint');
       if (hint && hasTiers) {
-        let label = '—';
-        if      (todaySecs >= g.bsdVal) label = 'Best Day';
-        else if (todaySecs >= g.avVal)  label = 'Average Day';
-        else if (todaySecs >= g.mvdVal) label = 'Minimum Viable Day';
-        hint.textContent = label !== '—' ? '✓ ' + label : '';
+        let label = '';
+        if      (tierVal >= g.bsdVal) label = 'Best Day';
+        else if (tierVal >= g.avVal)  label = 'Average Day';
+        else if (tierVal >= g.mvdVal) label = 'Minimum Viable Day';
+        hint.textContent = label ? '✓ ' + label : '';
       }
     }
 
@@ -3870,7 +3950,10 @@
 
   function computeWheelCeiling(holding) {
     holding = holding || [];
-    const sel = [..._selectedClipIndices].map(i => holding[i]).filter(Boolean);
+    // use selected clips if any, otherwise use all holding clips
+    const sel = _selectedClipIndices.size > 0
+      ? [..._selectedClipIndices].map(i => holding[i]).filter(Boolean)
+      : holding;
     if (!sel.length) return 1;
     if (sel.some(c => c.isGold)) return 3;
     const counts = {}; sel.forEach(c => { counts[c.id]=(counts[c.id]||0)+1; });
@@ -4591,33 +4674,82 @@
       pane.innerHTML = '<div class="hb-empty">no habit blockers — create them on PC</div>';
       return;
     }
+
     pane.innerHTML = blockers.map(b => {
       const active    = isBlockerActive(b);
       const subtasks  = b.subtasks || [];
       const doneCount = subtasks.filter(s => s.done).length;
-      const pct       = subtasks.length ? (doneCount / subtasks.length) * 100 : 0;
-      const locks     = (b.locks || []).map(lid => S.goalById(lid)).filter(Boolean);
-      const statusLabel = active ? 'BLOCKING' : 'CLEAR';
-      const statusColor = active ? 'var(--red)' : 'var(--green)';
-      const subtasksHtml = subtasks.map((s, i) => `
-        <div class="hb-subtask${s.done?' done':''}" onclick="toggleBlockerSubtask('${b.id}', ${i})">
-          <div class="hb-check">${s.done?'✓':''}</div>
-          <span>${s.label || s.text || s.name || 'Task '+(i+1)}</span>
-        </div>`).join('');
-      const locksHtml = locks.map(g => `
-        <span class="hb-lock-chip" style="color:${active?'var(--red)':'var(--green)'};background:${active?'rgba(196,106,106,0.1)':'var(--green-bg)'};border:0.5px solid ${active?'rgba(196,106,106,0.3)':'var(--green-border)'};">
+      const total     = subtasks.length;
+      const pct       = total ? (doneCount / total) * 100 : 0;
+      const accent    = b.color || '#cd8a3a';
+
+      // stat label
+      const thresholdPassed = b.startsBlockingAt != null;
+      let statLabel = '', statState = '';
+      if (!thresholdPassed) { statLabel = '—'; statState = 'neutral'; }
+      else if (active)      { statLabel = 'locking since ' + b.startsBlockingAt; statState = 'armed'; }
+      else                  { statLabel = 'clear'; statState = 'ok'; }
+
+      // locked goals chips
+      const allGoals  = S.goals().filter(g => g.kind !== 'blocker');
+      const locks     = (b.locks || []).map(lid => allGoals.find(g => String(g.id) === String(lid))).filter(Boolean);
+      const locksHtml = locks.map(g => {
+        const unlocked = !active;
+        return `<span class="hb-locked-chip${unlocked?' unlocked':''}">
+          <span class="hb-lock-icon">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </span>
+          <span class="hb-unlock-icon">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+            </svg>
+          </span>
           ${g.name}
-        </span>`).join('');
-      return `
-        <div class="hb-card${active?'':' cleared'}">
-          <div class="hb-header">
-            <div class="hb-dot" style="background:${b.color||'var(--amber)'};"></div>
-            <span class="hb-name">${b.name}</span>
-            <span class="hb-status-pill" style="color:${statusColor};background:${active?'rgba(196,106,106,0.1)':'var(--green-bg)'};border:0.5px solid ${active?'rgba(196,106,106,0.3)':'var(--green-border)'};">${statusLabel}</span>
+        </span>`;
+      }).join('');
+
+      const subtasksHtml = subtasks.map((s,i) => `
+        <div class="hb-task-row${s.done?' done':''}" onclick="toggleBlockerSubtask('${b.id}',${i})">
+          <div class="hb-task-check">
+            <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="#080807" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1.5,5 4,7.5 8.5,2.5"/>
+            </svg>
           </div>
-          <div class="hb-bar"><div class="hb-bar-fill" style="width:${pct}%;background:${active?'var(--amber)':'var(--green)'};"></div></div>
-          ${subtasksHtml ? `<div class="hb-subtasks">${subtasksHtml}</div>` : ''}
-          ${locks.length ? `<div class="hb-footer">locks<div class="hb-locks">${locksHtml}</div></div>` : ''}
+          <span class="hb-task-label">${s.label || s.text || s.name || 'Task '+(i+1)}</span>
+        </div>`).join('');
+
+      return `
+        <div class="hb-card" style="--hb-accent:${accent};">
+          <div class="hb-header">
+            <div class="hb-header-left">
+              <div class="hb-pip"></div>
+              <span class="hb-title">${b.name}</span>
+            </div>
+          </div>
+          <div class="hb-progress-track">
+            <div class="hb-progress-fill" style="width:${pct}%;"></div>
+          </div>
+          <div class="hb-tasks">${subtasksHtml}</div>
+          <div class="hb-divider"></div>
+          <div class="hb-stat-row">
+            <div class="hb-stat-count">
+              <span class="hb-stat-num${!active?' state-ok':''}">${doneCount}</span>
+              <span class="hb-stat-denom">/ ${total} tasks</span>
+            </div>
+            <span class="hb-stat-label state-${statState}">${statLabel}</span>
+          </div>
+          ${!active ? `
+          <div class="hb-banner show">
+            <div class="hb-banner-dot"></div>
+            <span class="hb-banner-text">cleared — goals unlocked</span>
+          </div>` : ''}
+          ${locks.length ? `
+          <div class="hb-footer">
+            <div class="hb-footer-label">locks</div>
+            <div class="hb-locked-list">${locksHtml}</div>
+          </div>` : ''}
         </div>`;
     }).join('');
   }
@@ -4627,14 +4759,14 @@
     const blocker = goals.find(g => String(g.id) === String(blockerId));
     if (!blocker || !blocker.subtasks) return;
     blocker.subtasks[idx].done = !blocker.subtasks[idx].done;
-    // check if all done — auto-complete
+    // auto-complete if all done
     if (blocker.subtasks.every(s => s.done)) {
       blocker.lastCompletedAt = Date.now();
       blocker.subtasks.forEach(s => s.done = false);
     }
     S.saveGoals(goals);
     renderBlockerPane();
-    renderGoals(); // re-render goals in case lock state changed
+    renderGoals();
   }
 
   // ── Re-sync from Firebase when app is foregrounded ────────────────────
