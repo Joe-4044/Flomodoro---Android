@@ -1387,6 +1387,20 @@
     .hb-unlock-icon { opacity: 0; width: 0; overflow: hidden; transition: opacity 0.4s; display: flex; align-items: center; }
     .hb-locked-chip.unlocked .hb-unlock-icon { opacity: 1; width: auto; }
 
+    .hb-task-row.self-locked { opacity: 0.35; pointer-events: none; }
+
+    .hb-self-locked-banner {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--red);
+      padding: 8px 15px;
+      background: rgba(196,106,106,0.08);
+      border-top: 0.5px solid rgba(196,106,106,0.2);
+    }
+
     .hb-empty { padding: 48px 20px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text4); letter-spacing: 0.05em; }
 
     /* ── OFFLINE BANNER ────────────────────────────────────────────────── */
@@ -4565,12 +4579,7 @@
     return item.pricingMode === 'usd-anchored' ? currentPatoPriceForUsd(item.usdPrice) : (item.price || 0);
   }
 
-  // ── KEY GLASS / KEY SHARD MECHANICS ───────────────────────────────────
-  const KEY_GLASS_TIERS = [
-    { minutes: 30, price: 10 },
-    { minutes: 60, price: 20 },
-    { minutes: 90, price: 30 },
-  ];
+  // ── HABIT BLOCKER LOGIC — mirrors PC exactly ──────────────────────────
 
   function mostRecentThreshold(hhmm) {
     const [h, m] = (hhmm || '00:00').split(':').map(n => parseInt(n) || 0);
@@ -4589,8 +4598,7 @@
   function isKeyShardBypassActive(gid) {
     const g = S.goalById(gid);
     if (!g || !g.keyShardBypass) return false;
-    const goals  = S.goals();
-    const blocker = goals.find(b => String(b.id) === String(g.keyShardBypass.blockerId));
+    const blocker = S.goalById(g.keyShardBypass.blockerId);
     if (!blocker || blocker.kind !== 'blocker') return false;
     return mostRecentThreshold(blocker.startsBlockingAt) === g.keyShardBypass.thresholdSnapshot;
   }
@@ -4600,19 +4608,43 @@
     return !b.lastCompletedAt || b.lastCompletedAt < threshold;
   }
 
-  function lockingBlockers(gid) {
-    const goals = S.goals();
-    return goals.filter(b => b.kind === 'blocker'
-      && (b.locks || []).map(String).includes(String(gid))
-      && isBlockerActive(b)
-      && !isKeyGlassActive(gid) && !isKeyShardBypassActive(gid));
+  function activeBypassBlockerIds(gid) {
+    const g = S.goalById(gid);
+    const ids = [];
+    if (g && isKeyShardBypassActive(gid)) ids.push(String(g.keyShardBypass.blockerId));
+    if (g && isKeyGlassActive(gid))       ids.push(String(g.keyGlassSession.blockerId));
+    return ids;
   }
 
+  // matches PC isLocked exactly — works for both goals and blockers
   function isGoalLocked(gid) {
-    return lockingBlockers(gid).length > 0;
+    const bypassed = activeBypassBlockerIds(gid);
+    return S.goals().some(b =>
+      b.kind === 'blocker' &&
+      String(b.id) !== String(gid) &&
+      !bypassed.includes(String(b.id)) &&
+      (b.locks || []).map(String).includes(String(gid)) &&
+      isBlockerActive(b)
+    );
   }
 
-  // apply Key Glass — starts a timed session bypass on a locked goal
+  function lockingBlockers(gid) {
+    const bypassed = activeBypassBlockerIds(gid);
+    return S.goals().filter(b =>
+      b.kind === 'blocker' &&
+      String(b.id) !== String(gid) &&
+      !bypassed.includes(String(b.id)) &&
+      (b.locks || []).map(String).includes(String(gid)) &&
+      isBlockerActive(b)
+    );
+  }
+
+  // ── KEY GLASS / KEY SHARD MECHANICS ───────────────────────────────────
+  const KEY_GLASS_TIERS = [
+    { minutes: 30, price: 10 },
+    { minutes: 60, price: 20 },
+    { minutes: 90, price: 30 },
+  ];
   function applyKeyGlass(goalId, tierIdx) {
     const goals  = S.goals();
     const g      = goals.find(go => String(go.id) === String(goalId));
@@ -4677,6 +4709,7 @@
 
     pane.innerHTML = blockers.map(b => {
       const active    = isBlockerActive(b);
+      const selfLocked = isGoalLocked(b.id); // this blocker is locked by another blocker
       const subtasks  = b.subtasks || [];
       const doneCount = subtasks.filter(s => s.done).length;
       const total     = subtasks.length;
@@ -4711,7 +4744,7 @@
       }).join('');
 
       const subtasksHtml = subtasks.map((s,i) => `
-        <div class="hb-task-row${s.done?' done':''}" onclick="toggleBlockerSubtask('${b.id}',${i})">
+        <div class="hb-task-row${s.done?' done':''}${selfLocked?' self-locked':''}" onclick="${selfLocked?'':'toggleBlockerSubtask(\''+b.id+'\','+i+')'}">
           <div class="hb-task-check">
             <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="#080807" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="1.5,5 4,7.5 8.5,2.5"/>
@@ -4732,6 +4765,11 @@
             <div class="hb-progress-fill" style="width:${pct}%;"></div>
           </div>
           <div class="hb-tasks">${subtasksHtml}</div>
+          ${selfLocked ? `
+          <div class="hb-self-locked-banner">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            this blocker is locked — complete the blocking habit first
+          </div>` : ''}
           <div class="hb-divider"></div>
           <div class="hb-stat-row">
             <div class="hb-stat-count">
@@ -4758,6 +4796,11 @@
     const goals   = S.goals();
     const blocker = goals.find(g => String(g.id) === String(blockerId));
     if (!blocker || !blocker.subtasks) return;
+    // if this blocker is itself locked by another blocker, prevent completion
+    if (isGoalLocked(blockerId)) {
+      alert(blocker.name + ' is locked — complete the blocking habit first.');
+      return;
+    }
     blocker.subtasks[idx].done = !blocker.subtasks[idx].done;
     // auto-complete if all done
     if (blocker.subtasks.every(s => s.done)) {
