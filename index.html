@@ -1391,15 +1391,17 @@
 
     .hb-self-locked-banner {
       display: flex;
-      align-items: center;
-      gap: 6px;
+      align-items: flex-start;
+      gap: 8px;
       font-family: var(--mono);
       font-size: 10px;
       color: var(--red);
-      padding: 8px 15px;
+      padding: 10px 15px 11px;
       background: rgba(196,106,106,0.08);
       border-top: 0.5px solid rgba(196,106,106,0.2);
+      line-height: 1.6;
     }
+    .hb-self-locked-banner svg { flex-shrink: 0; margin-top: 2px; }
 
     .hb-empty { padding: 48px 20px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text4); letter-spacing: 0.05em; }
 
@@ -4038,7 +4040,24 @@
         const rewardApp  = (g && g['reward'+tierNum+'App'])  || null;
         const rewardDur  = (g && g['reward'+tierNum+'Dur'])  || 30;
         const rewardType = (g && g['reward'+tierNum+'Type']) || 'ticket';
-        if (rewardType === 'ticket' || !g || !g['reward'+tierNum+'Type']) {
+        const rewardText = (g && g['reward'+tierNum])        || '';
+
+        if (rewardType === 'manual' && rewardText) {
+          // manual reward — show in modal, no ticket generated
+          ticket = {
+            code:        null,
+            rewardApp:   rewardText,
+            durationMins:null,
+            goalName:    g ? g.name : '—',
+            tier:        { t1:'T1', t2:'T2', t3:'T3', jackpot:'T3' }[outcome.id],
+            device:      'mobile',
+            status:      'active',
+            pcOnly:      false,
+            manual:      true,
+            earnedAt:    Date.now(),
+          };
+        } else {
+          // ticket reward — saved for PC to redeem after Sync Up
           const code = Math.random().toString(36).slice(2,6).toUpperCase();
           ticket = {
             code,
@@ -4048,7 +4067,8 @@
             tier:         { t1:'T1', t2:'T2', t3:'T3', jackpot:'T3' }[outcome.id],
             device:       'mobile',
             status:       'active',
-            pcOnly:       isAppPcOnly(rewardApp),
+            pcOnly:       true, // all tickets require PC to redeem
+            manual:       false,
             earnedAt:     Date.now(),
             expiresAt:    Date.now() + 24*3600*1000,
           };
@@ -4069,15 +4089,18 @@
     const label = tierLabels[outcome.id] || outcome.label;
     const color = outcome.color;
     const ticketHtml = ticket
-      ? `<div style="margin-top:16px;padding:14px;background:var(--bg4);border-radius:12px;border:0.5px solid var(--border);">
-           <div style="font-family:var(--mono);font-size:9px;color:var(--text4);letter-spacing:0.1em;margin-bottom:8px;">TICKET GENERATED</div>
-           <div style="font-family:var(--mono);font-size:32px;font-weight:700;letter-spacing:0.2em;color:var(--text);">${ticket.code}</div>
-           <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px;">${ticket.rewardApp} · ${ticket.durationMins} min · expires in 24h</div>
-           ${ticket.pcOnly || isAppPcOnly(ticket.rewardApp)
-             ? `<div style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--amber);">⚠ Not supported on Android · sync up to PC to redeem</div>`
-             : ''
-           }
-         </div>`
+      ? ticket.manual
+        ? `<div style="margin-top:16px;padding:14px;background:var(--bg4);border-radius:12px;border:0.5px solid var(--border);">
+             <div style="font-family:var(--mono);font-size:9px;color:var(--text4);letter-spacing:0.1em;margin-bottom:8px;">YOUR REWARD</div>
+             <div style="font-size:15px;font-weight:600;color:var(--text);">${ticket.rewardApp}</div>
+             <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px;">manual reward — no ticket required</div>
+           </div>`
+        : `<div style="margin-top:16px;padding:14px;background:var(--bg4);border-radius:12px;border:0.5px solid var(--border);">
+             <div style="font-family:var(--mono);font-size:9px;color:var(--text4);letter-spacing:0.1em;margin-bottom:8px;">TICKET GENERATED</div>
+             <div style="font-family:var(--mono);font-size:32px;font-weight:700;letter-spacing:0.2em;color:var(--text);">${ticket.code}</div>
+             <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px;">${ticket.rewardApp} · ${ticket.durationMins} min</div>
+             <div style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--amber);">⚠ Sync Up to PC to redeem</div>
+           </div>`
       : `<div style="margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--text4);">set a reward in goal settings to generate tickets</div>`;
     const modal = document.createElement('div');
     modal.id = 'spin-result-modal';
@@ -4412,10 +4435,10 @@
           </div>
           <div class="ticket-code" onclick="copyCode('${t.code}')">${t.code}</div>
           <div class="ticket-code-hint">Expires in ${fmtTimeRemaining(t.expiresAt)} · tap to copy</div>
-          ${t.pcOnly || isAppPcOnly(t.rewardApp)
-            ? `<div class="ticket-unsupported"><span class="ticket-unsupported-icon">⚠</span> Not supported on Android · PC only</div>`
-            : `<button class="ticket-redeem-btn" onclick="redeemTicket('${t.code}')">redeem on PC →</button>`
-          }
+          <div class="ticket-unsupported">
+            <span class="ticket-unsupported-icon">⚠</span>
+            Sync Up to PC to redeem
+          </div>
         </div>`).join('')}
 
       ${shownHistory.length ? `
