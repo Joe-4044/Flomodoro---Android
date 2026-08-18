@@ -2479,22 +2479,23 @@
     try {
       const { activeDevice, syncState } = await window.fbBootCheck();
 
-      // PC is the default owner — lock Android unless token is explicitly 'android'
       if (activeDevice !== 'android') {
         showLockedScreen();
         return;
       }
 
-      // Android is active — import synced state from PC if available
-      if (syncState && syncState.syncedFrom === 'pc') {
+      // Only import from Firebase if this is a fresh Sync Down
+      // (fv4_seeded not set means we haven't imported yet this session)
+      const alreadySeeded = localStorage.getItem('fv4_seeded');
+      if (!alreadySeeded && syncState && syncState.syncedFrom === 'pc') {
         importSyncState(syncState);
-      } else {
+      } else if (!alreadySeeded) {
         S.ensureSeed();
       }
+      // If already seeded, just use whatever is in localStorage — don't touch it
 
     } catch(e) {
-      // Firebase unreachable — boot from local state
-      S.ensureSeed();
+      if (!localStorage.getItem('fv4_seeded')) S.ensureSeed();
     }
     goLive();
   }
@@ -2547,7 +2548,15 @@
       S.saveTickets(arr);
     }
     if (syncState.jar)  S.saveJar(syncState.jar);
-    if (syncState.log)  S.saveLog(Array.isArray(syncState.log) ? syncState.log : Object.values(syncState.log));
+    if (syncState.log) {
+      const remoteLog = Array.isArray(syncState.log) ? syncState.log : Object.values(syncState.log);
+      const localLog  = S.log();
+      // merge: keep all local entries, add remote entries not already in local
+      const localIds  = new Set(localLog.map(e => String(e.id)));
+      const merged    = [...localLog, ...remoteLog.filter(e => !localIds.has(String(e.id)))];
+      merged.sort((a, b) => (b.punchIn || b.earnedAt || 0) - (a.punchIn || a.earnedAt || 0));
+      S.saveLog(merged);
+    }
     localStorage.setItem('fv4_seeded', 'true');
   }
 
@@ -2565,9 +2574,12 @@
   // listen for PC releasing the token back to android
   window.onActiveDeviceChange = function(val) {
     if (val === 'android') {
-      // PC synced up — import fresh state and go live
+      // PC synced down — clear seeded flag so fresh import runs, then go live
       window.fbBootCheck().then(({ syncState }) => {
-        if (syncState && syncState.syncedFrom === 'pc') importSyncState(syncState);
+        if (syncState && syncState.syncedFrom === 'pc') {
+          localStorage.removeItem('fv4_seeded'); // force fresh import
+          importSyncState(syncState);
+        }
         hideLockedScreen();
         goLive();
       });
