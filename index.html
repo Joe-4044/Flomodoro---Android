@@ -2598,7 +2598,8 @@
 
       // tier bar — for count goals show 0 between sessions (count resets each session)
       const hasTiers = g.mvdVal && g.bsdVal;
-      const barVal   = isCountGoal(g) ? 0 : todaySecs;
+      const todayVal = hasTiers ? S.todayValue(g.id) : 0;
+      const barVal   = isCountGoal(g) ? todayVal : todaySecs;
       const pct      = hasTiers
         ? Math.min(100, (barVal / g.bsdVal) * 100)
         : Math.min(100, todaySecs / 3600 * 33);
@@ -2606,11 +2607,11 @@
       // tier label
       let tierLabel = '';
       let tierColor = 'var(--text4)';
-      if (hasTiers && !isCountGoal(g)) {
-        // count goals: tier only meaningful during active session
-        if      (todaySecs >= g.bsdVal) { tierLabel = 'BSD'; tierColor = 'var(--blue)';  }
-        else if (todaySecs >= g.avVal)  { tierLabel = 'AV';  tierColor = 'var(--amber)'; }
-        else if (todaySecs >= g.mvdVal) { tierLabel = 'MVD'; tierColor = 'var(--green)'; }
+      if (hasTiers) {
+        const tierCheckVal = isCountGoal(g) ? todayVal : todaySecs;
+        if      (tierCheckVal >= g.bsdVal) { tierLabel = 'BSD'; tierColor = 'var(--blue)';  }
+        else if (tierCheckVal >= g.avVal)  { tierLabel = 'AV';  tierColor = 'var(--amber)'; }
+        else if (tierCheckVal >= g.mvdVal) { tierLabel = 'MVD'; tierColor = 'var(--green)'; }
       }
 
       // tick positions (MVD and AV as % of BSD)
@@ -2633,7 +2634,7 @@
           </div>
           <div class="gc-scale"><span>MVD</span><span>AV</span><span>BSD</span></div>
           <div class="gc-meta">
-            <span>${isLive ? '<span style="color:var(--green);">● live</span>' : fmtHrMin(todaySecs)+' today'}</span>
+            <span>${isLive ? '<span style="color:var(--green);">● live</span>' : isCountGoal(g) ? (todayVal > 0 ? todayVal + ' reps today' : '0 reps today') : fmtHrMin(todaySecs)+' today'}</span>
             ${locked
               ? `<span class="gc-tier-pill">locked</span>`
               : tierLabel
