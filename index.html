@@ -3280,8 +3280,27 @@
     const g = S.goalById(goalId);
     if (!g) return;
     _sheetGoalId = goalId;
+    // reset to default actions in case info sheet was open
     document.getElementById('sheet-dot').style.background = g.color || '#6aad7e';
     document.getElementById('sheet-name').textContent = g.name;
+    const actionsEl = document.querySelector('.sheet-actions');
+    if (actionsEl) actionsEl.innerHTML = `
+      <button class="sheet-action" onclick="sheetAction('info')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Info
+      </button>
+      <button class="sheet-action" onclick="sheetAction('edit')">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+      <button class="sheet-action" onclick="sheetAction('reorder')">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Reorder
+      </button>
+      <button class="sheet-action destructive" onclick="sheetAction('delete')">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        Delete
+      </button>`;
     document.getElementById('bottom-sheet-overlay').classList.add('open');
     document.getElementById('bottom-sheet').classList.add('open');
   }
@@ -3316,7 +3335,7 @@
         const infoHtml = `
           <div style="padding:14px 20px 20px;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-              <button onclick="openSheet(${g.id})" style="display:flex;align-items:center;gap:6px;color:var(--text3);background:none;border:none;font-family:var(--mono);font-size:11px;-webkit-tap-highlight-color:transparent;cursor:pointer;padding:0;">
+              <button onclick="closeSheet();setTimeout(()=>openSheet(${g.id}),200)" style="display:flex;align-items:center;gap:6px;color:var(--text3);background:none;border:none;font-family:var(--mono);font-size:11px;-webkit-tap-highlight-color:transparent;cursor:pointer;padding:0;">
                 <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="15 18 9 12 15 6"/></svg>
                 back
               </button>
@@ -3433,6 +3452,29 @@
     // save count to active session
     const act = S.active();
     if (act) { act.count = _tapCount; S.saveActive(act); }
+    // update tier bar and goal card live
+    updateSessionUI();
+    // update the live goal card tier bar
+    const g = act ? S.goalById(act.goalId) : null;
+    if (g && isCountGoal(g)) {
+      const hasTiers = g.mvdVal && g.bsdVal;
+      if (hasTiers) {
+        const pct      = Math.min(100, (_tapCount / g.bsdVal) * 100);
+        const barFill  = document.querySelector(`#gc-${g.id} .gc-bar-fill`);
+        const tierPill = document.querySelector(`#gc-${g.id} .gc-tier-pill`);
+        if (barFill) barFill.style.width = pct + '%';
+        if (tierPill) {
+          let label = '', color = 'var(--text4)';
+          if      (_tapCount >= g.bsdVal) { label = 'BSD'; color = 'var(--blue)'; }
+          else if (_tapCount >= g.avVal)  { label = 'AV';  color = 'var(--amber)'; }
+          else if (_tapCount >= g.mvdVal) { label = 'MVD'; color = 'var(--green)'; }
+          tierPill.textContent = label || '—';
+          tierPill.style.color = label ? color : 'var(--text4)';
+          tierPill.style.borderColor = label ? color + '44' : 'transparent';
+          tierPill.style.background  = label ? color + '11' : 'transparent';
+        }
+      }
+    }
   }
 
   // ── SWIPE-TO-PUNCH SLIDER ─────────────────────────────────────────────
