@@ -195,14 +195,28 @@
     .subnav-btn.active { color: var(--text); border-bottom-color: var(--green); }
 
     /* ── CLOCK SUB-PANELS ──────────────────────────────────────────────── */
-    .clock-panel {
-      display: none;
+    /* Swipeable clock panel container */
+    #clock-panels {
+      display: flex;
       flex: 1;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    #clock-panels::-webkit-scrollbar { display: none; }
+
+    .clock-panel {
+      display: flex;
+      flex-direction: column;
+      flex: 0 0 100%;
+      min-width: 100%;
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
+      scroll-snap-align: start;
     }
-    .clock-panel.active { display: flex; flex-direction: column; }
 
     /* ── GOALS LIST ────────────────────────────────────────────────────── */
     #goal-list {
@@ -1910,8 +1924,10 @@
         <button class="subnav-btn" onclick="switchClock('blockers')">Blockers</button>
       </div>
 
+      <div id="clock-panels">
+
       <!-- goals sub-panel (default) -->
-      <div class="clock-panel active" id="cp-goals">
+      <div class="clock-panel" id="cp-goals">
 
         <!-- clock widget -->
         <div id="clock-widget">
@@ -2017,6 +2033,8 @@
           <div class="blocker-pane" id="blocker-pane-inner"></div>
         </div>
       </div>
+
+      </div><!-- /clock-panels -->
 
     </div><!-- /panel-clock -->
 
@@ -2564,6 +2582,7 @@
     renderGoals();
     initSlider();
     updateSessionUI();
+    _initClockSwipe();
     const act = S.active();
     if (act) {
       const g = S.goalById(act.goalId);
@@ -2691,11 +2710,46 @@
   }
 
   // ── CLOCK SUB-NAV ─────────────────────────────────────────────────────
+  const CLOCK_SUBS = ['goals','log','wheel','jar','weekly','tickets','blockers'];
+
   function switchClock(sub) {
-    document.querySelectorAll('.clock-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.subnav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('cp-' + sub).classList.add('active');
-    event.currentTarget.classList.add('active');
+    const container = document.getElementById('clock-panels');
+    const idx = CLOCK_SUBS.indexOf(sub);
+    if (!container || idx === -1) return;
+    container.scrollTo({ left: idx * container.offsetWidth, behavior: 'smooth' });
+    _updateClockNav(sub);
+    _renderClockSub(sub);
+  }
+
+  function _updateClockNav(sub) {
+    document.querySelectorAll('.subnav-btn').forEach((b, i) => {
+      b.classList.toggle('active', CLOCK_SUBS[i] === sub);
+    });
+    const activeBtn = document.querySelector('.subnav-btn.active');
+    if (activeBtn) activeBtn.scrollIntoView({ inline:'center', block:'nearest', behavior:'smooth' });
+  }
+
+  function _renderClockSub(sub) {
+    if (sub === 'wheel')    renderWheelPane();
+    if (sub === 'jar')      renderJarPane();
+    if (sub === 'weekly')   renderWeeklyPane();
+    if (sub === 'tickets')  renderTicketsPane();
+    if (sub === 'log')      renderLogPane();
+    if (sub === 'blockers') renderBlockerPane();
+  }
+
+  function _initClockSwipe() {
+    const container = document.getElementById('clock-panels');
+    if (!container) return;
+    let _lastSub = 'goals', _debounce = null;
+    container.addEventListener('scroll', () => {
+      clearTimeout(_debounce);
+      _debounce = setTimeout(() => {
+        const idx = Math.round(container.scrollLeft / Math.max(container.offsetWidth, 1));
+        const sub = CLOCK_SUBS[Math.min(idx, CLOCK_SUBS.length-1)] || 'goals';
+        if (sub !== _lastSub) { _lastSub = sub; _updateClockNav(sub); _renderClockSub(sub); }
+      }, 80);
+    }, { passive: true });
   }
 
   // ── WIZARD HELPERS ────────────────────────────────────────────────────
@@ -4193,19 +4247,7 @@
 
 
   // render wheel when tab is switched to it — patch after original is defined
-  const _origSwitchClock = switchClock;
-  window.switchClock = function(sub) {
-    document.querySelectorAll('.clock-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.subnav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('cp-' + sub).classList.add('active');
-    event.currentTarget.classList.add('active');
-    if (sub === 'wheel')    renderWheelPane();
-    if (sub === 'jar')      renderJarPane();
-    if (sub === 'weekly')   renderWeeklyPane();
-    if (sub === 'tickets')  renderTicketsPane();
-    if (sub === 'log')      renderLogPane();
-    if (sub === 'blockers') renderBlockerPane();
-  };
+  window.switchClock = switchClock;
 
   // ── SHOP ──────────────────────────────────────────────────────────────
   const CATALOG_CATEGORIES = [
